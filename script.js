@@ -40,6 +40,44 @@ const PER = 20;
 const CR = {};
 
 // ═══════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════
+const SB_URL = 'https://mbtwhghgqifjkgskrzlr.supabase.co';
+const SB_KEY = 'sb_publishable_D-C-FFYIEvvi_dWvQITWRg__Z2wA0Us';
+const sb = (window.supabase||window.Supabase) ? (window.supabase||window.Supabase).createClient(SB_URL, SB_KEY) : null;
+
+async function saveAllToSupabase(){
+  if(!sb) return;
+  await sb.from('lancamentos').delete().not('id','is',null);
+  const rows=[];
+  Object.entries(D).forEach(([tipo,units])=>{
+    Object.entries(units).forEach(([unidade,entries])=>{
+      entries.forEach(dados=>rows.push({tipo,unidade,dados}));
+    });
+  });
+  if(!rows.length) return;
+  for(let i=0;i<rows.length;i+=500){
+    const {error}=await sb.from('lancamentos').insert(rows.slice(i,i+500));
+    if(error) console.warn('Supabase insert:',error.message);
+  }
+}
+
+async function loadFromSupabase(){
+  if(!sb) return false;
+  const {data,error}=await sb.from('lancamentos').select('tipo,unidade,dados');
+  if(error||!data||!data.length) return false;
+  data.forEach(({tipo,unidade,dados})=>{
+    if(D[tipo]&&D[tipo][unidade]) D[tipo][unidade].push(dados);
+  });
+  return true;
+}
+
+async function clearSupabase(){
+  if(!sb) return;
+  await sb.from('lancamentos').delete().not('id','is',null);
+}
+
+// ═══════════════════════════════════════════════
 // ESTADO DA UNIDADE
 // ═══════════════════════════════════════════════
 let uniFilter='';
@@ -915,6 +953,7 @@ function doImport(tab){
   }
 
   try{ localStorage.setItem('gss_cache_v2', JSON.stringify({D,dtIni,dtFim,ts:Date.now()})); }catch(e){}
+  saveAllToSupabase().catch(e=>console.warn('Supabase sync:',e));
   renderAll();
   updateImpSummary();
   showImpStatus(tab, `✓ ${count} lançamentos importados${skipped?' ('+skipped+' linhas ignoradas)':''}!`, 'ok');
@@ -936,6 +975,7 @@ function clearAllImported(){
   if(!confirm('Limpar TODOS os dados importados manualmente?')) return;
   Object.keys(D).forEach(k=>{ D[k]={mat:[],fil:[]}; });
   try{ localStorage.removeItem('gss_cache_v2'); }catch(e){}
+  clearSupabase().catch(()=>{});
   renderAll();
   updateImpSummary();
   toast('Dados limpos.');
@@ -962,26 +1002,37 @@ function updateImpSummary(){
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
-(function(){
+(async function(){
   const t=today(), y=t.slice(0,4), m=t.slice(5,7);
   dtIni=`${y}-${m}-01`;
   dtFim=`${y}-${m}-${String(new Date(+y,+m,0).getDate()).padStart(2,'0')}`;
-
-  try{
-    const raw=localStorage.getItem('gss_cache_v2');
-    if(raw){
-      const obj=JSON.parse(raw);
-      if(obj&&obj.D){
-        Object.keys(obj.D).forEach(k=>{ if(D[k]) D[k]=obj.D[k]; });
-        setTimeout(()=>toast('Dados restaurados do cache. Use "Limpar Tudo" para resetar.'),400);
-      }
-    }
-  }catch(e){}
-
   g('dt-ini').value=dtIni; g('dt-fim').value=dtFim;
   g('pinfo').textContent=iso2br(dtIni)+' → '+iso2br(dtFim);
   renderAll();
-})();
+  updateImpSummary();
 
-renderDash();
-updateImpSummary();
+  // 1. Tentar Supabase primeiro
+  let restored=false;
+  try{ restored=await loadFromSupabase(); }catch(e){}
+
+  // 2. Fallback: localStorage
+  if(!restored){
+    try{
+      const raw=localStorage.getItem('gss_cache_v2');
+      if(raw){
+        const obj=JSON.parse(raw);
+        if(obj&&obj.D){
+          Object.keys(obj.D).forEach(k=>{ if(D[k]) D[k]=obj.D[k]; });
+          restored=true;
+          saveAllToSupabase().catch(()=>{}); // migrar para Supabase em background
+        }
+      }
+    }catch(e){}
+  }
+
+  if(restored){
+    renderAll();
+    updateImpSummary();
+    toast('Dados restaurados.');
+  }
+})();
