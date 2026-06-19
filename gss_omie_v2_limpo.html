@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GSS — Financeiro Omie</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-name">Golf Ship Solutions</div>
+    <div class="logo-sub">Financeiro · Omie ERP</div>
+  </div>
+  <div class="nav">
+    <div class="nav-sec">Visão Geral</div>
+    <div class="nav-item active" onclick="go('dashboard',this)"><i class="ti ti-layout-dashboard"></i>Dashboard</div>
+    <div class="nav-sec">Financeiro</div>
+    <div class="nav-item" onclick="go('receber',this)"><i class="ti ti-trending-up"></i>Contas a Receber</div>
+    <div class="nav-item" onclick="go('pagar',this)"><i class="ti ti-trending-down"></i>Contas a Pagar</div>
+    <div class="nav-item" onclick="go('faturamento',this)"><i class="ti ti-file-invoice"></i>Faturamento / Pedidos</div>
+    <div class="nav-item" onclick="go('fluxo',this)"><i class="ti ti-arrows-exchange"></i>Fluxo de Caixa</div>
+    <div class="nav-sec">Ferramentas</div>
+    <div class="nav-item" onclick="go('importar',this)"><i class="ti ti-file-spreadsheet"></i>Importar Planilha</div>
+  </div>
+  <div class="nav-foot">
+    <div class="nav-foot-lbl">Golf Ship Solutions</div>
+    <div class="nav-foot-info"><i class="ti ti-building" style="font-size:12px"></i>Matriz + Filial</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- PERIOD BAR -->
+  <div class="period-bar">
+    <button class="pb" onclick="setP('hoje',this)">Hoje</button>
+    <button class="pb" onclick="setP('semana',this)">Semana</button>
+    <button class="pb active" id="pb-mes" onclick="setP('mes',this)">Mês atual</button>
+    <button class="pb" onclick="setP('trim',this)">Trimestre</button>
+    <button class="pb" onclick="setP('ano',this)">Ano</button>
+    <span class="period-sep">|</span>
+    <div class="dt-range">
+      <input type="date" id="dt-ini" onchange="setCustom()">
+      <span style="font-size:10px;color:rgba(255,255,255,.25)">→</span>
+      <input type="date" id="dt-fim" onchange="setCustom()">
+    </div>
+    <span class="period-sep">|</span>
+    <div style="display:flex;align-items:center;gap:5px">
+      <span style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em">Unidade</span>
+      <button class="pb active" id="uf-all" onclick="setUni('',this)">Todas</button>
+      <button class="pb" id="uf-mat" onclick="setUni('mat',this)">Matriz</button>
+      <button class="pb" id="uf-fil" onclick="setUni('fil',this)">Filial</button>
+    </div>
+    <span class="period-info" id="pinfo"></span>
+  </div>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="page-title" id="ptitle">Dashboard</div>
+      <div class="page-sub" id="psub">Visão geral — Omie ERP</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost" onclick="exportCSV()"><i class="ti ti-download"></i>Exportar CSV</button>
+      <button class="btn btn-primary" onclick="renderAll()"><i class="ti ti-refresh"></i>Atualizar</button>
+    </div>
+  </div>
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="page active" id="page-dashboard">
+    <div class="kpis k4">
+      <div class="kpi gr"><div class="kpi-lbl"><i class="ti ti-trending-up"></i>RECEBIDO NO MÊS</div><div class="kpi-val gr" id="k-rec-pago">—</div><div class="kpi-sub" id="k-rec-pago-s">Baixas confirmadas</div></div>
+      <div class="kpi am"><div class="kpi-lbl"><i class="ti ti-clock"></i>A RECEBER</div><div class="kpi-val am" id="k-rec-aberto">—</div><div class="kpi-sub" id="k-rec-aberto-s">Em aberto</div></div>
+      <div class="kpi re"><div class="kpi-lbl"><i class="ti ti-trending-down"></i>PAGO NO MÊS</div><div class="kpi-val re" id="k-pag-pago">—</div><div class="kpi-sub" id="k-pag-pago-s">Baixas quitadas</div></div>
+      <div class="kpi am"><div class="kpi-lbl"><i class="ti ti-clock"></i>A PAGAR</div><div class="kpi-val am" id="k-pag-aberto">—</div><div class="kpi-sub" id="k-pag-aberto-s">Em aberto</div></div>
+    </div>
+    <div class="kpis k3">
+      <div class="kpi bl"><div class="kpi-lbl"><i class="ti ti-file-invoice"></i>FATURAMENTO</div><div class="kpi-val bl" id="k-fat">—</div><div class="kpi-sub" id="k-fat-s">NF-e emitidas</div></div>
+      <div class="kpi pu"><div class="kpi-lbl"><i class="ti ti-shopping-cart"></i>PEDIDOS DE VENDA</div><div class="kpi-val pu" id="k-ped">—</div><div class="kpi-sub" id="k-ped-s">No período</div></div>
+      <div class="kpi re"><div class="kpi-lbl"><i class="ti ti-arrow-back-up"></i>DEVOLUÇÕES</div><div class="kpi-val re" id="k-dev">—</div><div class="kpi-sub" id="k-dev-s">NF-e de devolução</div></div>
+    </div>
+
+    <div class="g2">
+      <div class="ucard">
+        <div class="ucard-hdr"><div class="dot" style="background:#4da6e8"></div><div class="ucard-name">Matriz</div></div>
+        <div class="urow"><span class="ul">Recebido no mês</span><span class="uv gr" id="d-mat-recpago">—</span></div>
+        <div class="urow"><span class="ul">A Receber</span><span class="uv am" id="d-mat-recaberto">—</span></div>
+        <div class="urow"><span class="ul">Pago no mês</span><span class="uv re" id="d-mat-pagpago">—</span></div>
+        <div class="urow"><span class="ul">A Pagar</span><span class="uv am" id="d-mat-pagaberto">—</span></div>
+        <div class="urow"><span class="ul">Faturamento</span><span class="uv bl" id="d-mat-fat">—</span></div>
+      </div>
+      <div class="ucard">
+        <div class="ucard-hdr"><div class="dot" style="background:#FAC775"></div><div class="ucard-name">Filial</div></div>
+        <div class="urow"><span class="ul">Recebido no mês</span><span class="uv gr" id="d-fil-recpago">—</span></div>
+        <div class="urow"><span class="ul">A Receber</span><span class="uv am" id="d-fil-recaberto">—</span></div>
+        <div class="urow"><span class="ul">Pago no mês</span><span class="uv re" id="d-fil-pagpago">—</span></div>
+        <div class="urow"><span class="ul">A Pagar</span><span class="uv am" id="d-fil-pagaberto">—</span></div>
+        <div class="urow"><span class="ul">Faturamento</span><span class="uv am" id="d-fil-fat">—</span></div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-bar"></i>Recebido × Pago — Matriz vs Filial</div>
+        <div style="position:relative;height:190px"><canvas id="c-dash-bar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-pie"></i>Saídas por Categoria</div>
+        <div style="position:relative;height:190px"><canvas id="c-dash-pie"></canvas></div>
+      </div>
+    </div>
+
+    <div class="tcard">
+      <div class="tcard-hdr"><div class="tcard-title"><i class="ti ti-list-details"></i>Últimos lançamentos</div></div>
+      <div id="dash-last"></div>
+    </div>
+  </div>
+
+  <!-- ═══ CONTAS A RECEBER ═══ -->
+  <div class="page" id="page-receber">
+    <div class="kpis k3">
+      <div class="kpi gr"><div class="kpi-lbl"><i class="ti ti-check-circle"></i>RECEBIDO NO MÊS</div><div class="kpi-val gr" id="r-pago">—</div><div class="kpi-sub" id="r-pago-s">Baixas confirmadas no período</div></div>
+      <div class="kpi am"><div class="kpi-lbl"><i class="ti ti-clock"></i>A RECEBER</div><div class="kpi-val am" id="r-aberto">—</div><div class="kpi-sub" id="r-aberto-s">Títulos em aberto</div></div>
+      <div class="kpi re"><div class="kpi-lbl"><i class="ti ti-alert-circle"></i>VENCIDO</div><div class="kpi-val re" id="r-vencido">—</div><div class="kpi-sub" id="r-vencido-s">Em atraso</div></div>
+    </div>
+    <div class="g2">
+      <div class="ucard">
+        <div class="ucard-hdr"><div class="dot" style="background:#4da6e8"></div><div class="ucard-name">Matriz</div></div>
+        <div class="urow"><span class="ul">Recebido</span><span class="uv gr" id="r-mat-pago">—</span></div>
+        <div class="urow"><span class="ul">A Receber</span><span class="uv am" id="r-mat-aberto">—</span></div>
+        <div class="urow"><span class="ul">Vencido</span><span class="uv re" id="r-mat-vencido">—</span></div>
+        <div class="urow"><span class="ul">Total</span><span class="uv bl" id="r-mat-total">—</span></div>
+      </div>
+      <div class="ucard">
+        <div class="ucard-hdr"><div class="dot" style="background:#FAC775"></div><div class="ucard-name">Filial</div></div>
+        <div class="urow"><span class="ul">Recebido</span><span class="uv gr" id="r-fil-pago">—</span></div>
+        <div class="urow"><span class="ul">A Receber</span><span class="uv am" id="r-fil-aberto">—</span></div>
+        <div class="urow"><span class="ul">Vencido</span><span class="uv re" id="r-fil-vencido">—</span></div>
+        <div class="urow"><span class="ul">Total</span><span class="uv am" id="r-fil-total">—</span></div>
+      </div>
+    </div>
+    <div class="tcard">
+      <div class="tcard-hdr"><div class="tcard-title"><i class="ti ti-trending-up"></i>Títulos a Receber</div></div>
+      <div class="toolbar">
+        <div class="srch"><i class="ti ti-search"></i><input type="text" id="r-srch" placeholder="Buscar cliente…" oninput="renderRec()"></div>
+        <select class="fsel" id="r-uni" onchange="renderRec()"><option value="">Matriz + Filial</option><option>Matriz</option><option>Filial</option></select>
+        <select class="fsel" id="r-st" onchange="renderRec()"><option value="">Todos status</option><option value="PAGO">Recebido</option><option value="ABERTO">A Receber</option><option value="VENCIDO">Vencido</option></select>
+        <span class="cnt-badge" id="r-cnt">—</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="tbl"><thead><tr><th>Vencimento</th><th>Unidade</th><th>Cliente</th><th>Categoria</th><th>NF / Doc</th><th>Status</th><th class="right">Valor</th></tr></thead>
+        <tbody id="r-tbody"></tbody></table>
+      </div>
+      <div class="pag-row"><span class="pag-info" id="r-pinfo">—</span><div class="pag-btns" id="r-pbtns"></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ CONTAS A PAGAR ═══ -->
+  <div class="page" id="page-pagar">
+    <div class="kpis k3">
+      <div class="kpi re"><div class="kpi-lbl"><i class="ti ti-check-circle"></i>PAGO NO MÊS</div><div class="kpi-val re" id="p-pago">—</div><div class="kpi-sub" id="p-pago-s">Quitado no período</div></div>
+      <div class="kpi am"><div class="kpi-lbl"><i class="ti ti-clock"></i>A PAGAR</div><div class="kpi-val am" id="p-aberto">—</div><div class="kpi-sub" id="p-aberto-s">Em aberto</div></div>
+      <div class="kpi re"><div class="kpi-lbl"><i class="ti ti-alert-circle"></i>VENCIDO</div><div class="kpi-val re" id="p-vencido">—</div><div class="kpi-sub" id="p-vencido-s">Em atraso</div></div>
+    </div>
+    <div class="g2">
+      <div class="ucard">
+        <div class="ucard-hdr"><div class="dot" style="background:#4da6e8"></div><div class="ucard-name">Matriz</div></div>
+        <div class="urow"><span class="ul">Pago</span><span class="uv re" id="p-mat-pago">—</span></div>
+        <div class="urow"><span class="ul">A Pagar</span><span class="uv am" id="p-mat-aberto">—</span></div>
+        <div class="urow"><span class="ul">Vencido</span><span class="uv re" id="p-mat-vencido">—</span></div>
+        <div class="urow"><span class="ul">Total</span><span class="uv re" id="p-mat-total">—</span></div>
+      </div>
+      <div class="ucard">
+        <div class="ucard-hdr"><div class="dot" style="background:#FAC775"></div><div class="ucard-name">Filial</div></div>
+        <div class="urow"><span class="ul">Pago</span><span class="uv re" id="p-fil-pago">—</span></div>
+        <div class="urow"><span class="ul">A Pagar</span><span class="uv am" id="p-fil-aberto">—</span></div>
+        <div class="urow"><span class="ul">Vencido</span><span class="uv re" id="p-fil-vencido">—</span></div>
+        <div class="urow"><span class="ul">Total</span><span class="uv re" id="p-fil-total">—</span></div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-pie"></i>Frete · Gelo Seco · Mercadoria para Revenda</div>
+        <div style="position:relative;height:220px"><canvas id="c-pag-pizza"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-bar"></i>Top categorias</div>
+        <div style="position:relative;height:220px"><canvas id="c-pag-bar"></canvas></div>
+      </div>
+    </div>
+    <div class="tcard">
+      <div class="tcard-hdr"><div class="tcard-title"><i class="ti ti-trending-down"></i>Títulos a Pagar</div></div>
+      <div class="toolbar">
+        <div class="srch"><i class="ti ti-search"></i><input type="text" id="p-srch" placeholder="Buscar fornecedor…" oninput="renderPag()"></div>
+        <select class="fsel" id="p-uni" onchange="renderPag()"><option value="">Matriz + Filial</option><option>Matriz</option><option>Filial</option></select>
+        <select class="fsel" id="p-st" onchange="renderPag()"><option value="">Todos status</option><option value="PAGO">Pago</option><option value="ABERTO">A Pagar</option><option value="VENCIDO">Vencido</option></select>
+        <span class="cnt-badge" id="p-cnt">—</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="tbl"><thead><tr><th>Vencimento</th><th>Unidade</th><th>Fornecedor</th><th>Categoria</th><th>Status</th><th class="right">Valor</th></tr></thead>
+        <tbody id="p-tbody"></tbody></table>
+      </div>
+      <div class="pag-row"><span class="pag-info" id="p-pinfo">—</span><div class="pag-btns" id="p-pbtns"></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ FATURAMENTO / PEDIDOS ═══ -->
+  <div class="page" id="page-faturamento">
+    <div class="kpis k4">
+      <div class="kpi bl"><div class="kpi-lbl"><i class="ti ti-file-invoice"></i>FATURAMENTO TOTAL</div><div class="kpi-val bl" id="fat-total">—</div><div class="kpi-sub" id="fat-total-s">NF-e emitidas no período</div></div>
+      <div class="kpi pu"><div class="kpi-lbl"><i class="ti ti-shopping-cart"></i>PEDIDOS DE VENDA</div><div class="kpi-val pu" id="fat-ped">—</div><div class="kpi-sub" id="fat-ped-s">Pedidos faturados</div></div>
+      <div class="kpi re"><div class="kpi-lbl"><i class="ti ti-arrow-back-up"></i>DEVOLUÇÕES</div><div class="kpi-val re" id="fat-dev">—</div><div class="kpi-sub" id="fat-dev-s">NF-e de devolução</div></div>
+      <div class="kpi gr"><div class="kpi-lbl"><i class="ti ti-calculator"></i>FAT. LÍQUIDO</div><div class="kpi-val gr" id="fat-liq">—</div><div class="kpi-sub">Faturamento − Devoluções</div></div>
+    </div>
+    <div class="g2">
+      <div class="ucard">
+        <div class="ucard-hdr"><div class="dot" style="background:#4da6e8"></div><div class="ucard-name">Matriz</div></div>
+        <div class="urow"><span class="ul">Faturamento</span><span class="uv bl" id="fat-mat-val">—</span></div>
+        <div class="urow"><span class="ul">Devoluções</span><span class="uv re" id="fat-mat-dev">—</span></div>
+        <div class="urow"><span class="ul">Líquido</span><span class="uv gr" id="fat-mat-liq">—</span></div>
+        <div class="urow"><span class="ul">Participação</span><span class="uv bl" id="fat-mat-pct">—</span></div>
+      </div>
+      <div class="ucard">
+        <div class="ucard-hdr"><div class="dot" style="background:#FAC775"></div><div class="ucard-name">Filial</div></div>
+        <div class="urow"><span class="ul">Faturamento</span><span class="uv am" id="fat-fil-val">—</span></div>
+        <div class="urow"><span class="ul">Devoluções</span><span class="uv re" id="fat-fil-dev">—</span></div>
+        <div class="urow"><span class="ul">Líquido</span><span class="uv gr" id="fat-fil-liq">—</span></div>
+        <div class="urow"><span class="ul">Participação</span><span class="uv am" id="fat-fil-pct">—</span></div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-pie"></i>Matriz vs Filial</div>
+        <div style="position:relative;height:200px"><canvas id="c-fat-pie"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-users"></i>Top 10 Clientes — Faturamento</div>
+        <div id="fat-topwrap" style="max-height:210px;overflow-y:auto;padding-top:2px"></div>
+      </div>
+    </div>
+    <div class="tcard">
+      <div class="tcard-hdr"><div class="tcard-title"><i class="ti ti-file-invoice"></i>NF-e / Pedidos</div></div>
+      <div class="toolbar">
+        <div class="srch"><i class="ti ti-search"></i><input type="text" id="fat-srch" placeholder="Buscar cliente, NF…" oninput="renderFat()"></div>
+        <select class="fsel" id="fat-uni" onchange="renderFat()"><option value="">Matriz + Filial</option><option>Matriz</option><option>Filial</option></select>
+        <select class="fsel" id="fat-tipo" onchange="renderFat()"><option value="">NF + Pedidos</option><option value="NF">Só NF-e</option><option value="PED">Só Pedidos</option><option value="DEV">Só Devoluções</option></select>
+        <span class="cnt-badge" id="fat-cnt">—</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="tbl"><thead><tr><th>Data</th><th>Unidade</th><th>Cliente</th><th>Nº Doc</th><th>Tipo</th><th class="right">Valor</th></tr></thead>
+        <tbody id="fat-tbody"></tbody></table>
+      </div>
+      <div class="pag-row"><span class="pag-info" id="fat-pinfo">—</span><div class="pag-btns" id="fat-pbtns"></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ FLUXO DE CAIXA ═══ -->
+  <div class="page" id="page-fluxo">
+    <div class="kpis k4">
+      <div class="kpi gr"><div class="kpi-lbl"><i class="ti ti-arrow-down-circle"></i>ENTRADAS</div><div class="kpi-val gr" id="fx-in">—</div><div class="kpi-sub">Recebimentos confirmados</div></div>
+      <div class="kpi re"><div class="kpi-lbl"><i class="ti ti-arrow-up-circle"></i>SAÍDAS</div><div class="kpi-val re" id="fx-out">—</div><div class="kpi-sub">Pagamentos quitados</div></div>
+      <div class="kpi bl"><div class="kpi-lbl"><i class="ti ti-scale"></i>SALDO CAIXA</div><div class="kpi-val bl" id="fx-saldo">—</div><div class="kpi-sub">Entradas − Saídas</div></div>
+      <div class="kpi am"><div class="kpi-lbl"><i class="ti ti-percentage"></i>MARGEM</div><div class="kpi-val am" id="fx-margem">—</div><div class="kpi-sub">Saldo / Entradas</div></div>
+    </div>
+    <div class="g2">
+      <div class="chart-card" style="margin-bottom:14px">
+        <div class="chart-title"><i class="ti ti-podium"></i>Top 10 Categorias de Custo — Maior para Menor</div>
+        <div id="fx-top10"></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div class="chart-card" style="margin-bottom:11px">
+          <div class="chart-title"><i class="ti ti-building-bank"></i>Movimentação por Conta Corrente</div>
+          <div id="fx-bancos"></div>
+        </div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-bar"></i>Entradas × Saídas — Matriz vs Filial</div>
+        <div style="position:relative;height:190px"><canvas id="c-fx-bar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-pie"></i>Saídas por Categoria (Top 7)</div>
+        <div style="position:relative;height:190px"><canvas id="c-fx-pie"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ IMPORTAR PLANILHA ═══ -->
+  <div class="page" id="page-importar">
+
+    <div class="tcard" style="margin-bottom:0">
+      <div class="imp-tabs">
+        <button class="imp-tab rec active" id="itab-rec" onclick="showImpTab('rec')">
+          <i class="ti ti-trending-up" style="font-size:12px"></i>Contas a Receber
+        </button>
+        <button class="imp-tab pag" id="itab-pag" onclick="showImpTab('pag')">
+          <i class="ti ti-trending-down" style="font-size:12px"></i>Contas a Pagar
+        </button>
+        <button class="imp-tab fat" id="itab-fat" onclick="showImpTab('fat')">
+          <i class="ti ti-file-invoice" style="font-size:12px"></i>Faturamento
+        </button>
+        <button class="imp-tab flx" id="itab-flx" onclick="showImpTab('flx')">
+          <i class="ti ti-arrows-exchange" style="font-size:12px"></i>Fluxo de Caixa
+        </button>
+      </div>
+
+      <!-- ── RECEBER ── -->
+      <div class="imp-panel active" id="ipanel-rec">
+        <div class="drop-zone" id="dz-rec">
+          <input type="file" accept=".xlsx,.xls,.csv" onchange="loadFile('rec',this)">
+          <i class="ti ti-upload"></i>
+          <div class="dz-title">Relatório de Contas a Receber</div>
+          <div class="dz-sub">Arraste ou clique · .xlsx · .xls · .csv</div>
+        </div>
+        <div class="map-section" id="map-rec">
+          <div class="map-title"><i class="ti ti-adjustments"></i>Mapeie as colunas da planilha</div>
+          <div class="col-grid">
+            <div class="col-item"><label>Data / Vencimento</label><select id="rc-data"></select></div>
+            <div class="col-item"><label>Cliente</label><select id="rc-cli"></select></div>
+            <div class="col-item"><label>Valor</label><select id="rc-val"></select></div>
+            <div class="col-item"><label>Status</label><select id="rc-st"></select></div>
+            <div class="col-item"><label>Categoria</label><select id="rc-cat"></select></div>
+            <div class="col-item"><label>NF / Documento</label><select id="rc-nf"></select></div>
+            <div class="col-item"><label>Conta Corrente</label><select id="rc-conta"></select></div>
+            <div class="col-item"><label>Observação</label><select id="rc-obs"></select></div>
+          </div>
+          <div class="uni-row">
+            <label>Unidade padrão:</label>
+            <select id="rc-uni"><option value="Matriz">Matriz</option><option value="Filial">Filial</option><option value="col">Ler da coluna →</option></select>
+            <select id="rc-uni-col" style="display:none"></select>
+          </div>
+          <div class="map-title" style="margin-top:4px"><i class="ti ti-eye"></i>Prévia (8 linhas)</div>
+          <div class="preview-box" id="prev-rec"></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="doImport('rec')"><i class="ti ti-file-import"></i>Importar lançamentos</button>
+            <button class="btn btn-ghost" onclick="resetImp('rec')"><i class="ti ti-x"></i>Cancelar</button>
+          </div>
+        </div>
+        <div class="imp-status" id="ist-rec"></div>
+      </div>
+
+      <!-- ── PAGAR ── -->
+      <div class="imp-panel" id="ipanel-pag">
+        <div class="drop-zone" id="dz-pag">
+          <input type="file" accept=".xlsx,.xls,.csv" onchange="loadFile('pag',this)">
+          <i class="ti ti-upload"></i>
+          <div class="dz-title">Relatório de Contas a Pagar</div>
+          <div class="dz-sub">Arraste ou clique · .xlsx · .xls · .csv</div>
+        </div>
+        <div class="map-section" id="map-pag">
+          <div class="map-title"><i class="ti ti-adjustments"></i>Mapeie as colunas da planilha</div>
+          <div class="col-grid">
+            <div class="col-item"><label>Data / Vencimento</label><select id="pg-data"></select></div>
+            <div class="col-item"><label>Fornecedor</label><select id="pg-forn"></select></div>
+            <div class="col-item"><label>Valor</label><select id="pg-val"></select></div>
+            <div class="col-item"><label>Status</label><select id="pg-st"></select></div>
+            <div class="col-item"><label>Categoria</label><select id="pg-cat"></select></div>
+            <div class="col-item"><label>NF / Documento</label><select id="pg-nf"></select></div>
+            <div class="col-item"><label>Conta Corrente</label><select id="pg-conta"></select></div>
+            <div class="col-item"><label>Observação</label><select id="pg-obs"></select></div>
+          </div>
+          <div class="uni-row">
+            <label>Unidade padrão:</label>
+            <select id="pg-uni"><option value="Matriz">Matriz</option><option value="Filial">Filial</option><option value="col">Ler da coluna →</option></select>
+            <select id="pg-uni-col" style="display:none"></select>
+          </div>
+          <div class="map-title" style="margin-top:4px"><i class="ti ti-eye"></i>Prévia (8 linhas)</div>
+          <div class="preview-box" id="prev-pag"></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="doImport('pag')"><i class="ti ti-file-import"></i>Importar lançamentos</button>
+            <button class="btn btn-ghost" onclick="resetImp('pag')"><i class="ti ti-x"></i>Cancelar</button>
+          </div>
+        </div>
+        <div class="imp-status" id="ist-pag"></div>
+      </div>
+
+      <!-- ── FATURAMENTO ── -->
+      <div class="imp-panel" id="ipanel-fat">
+        <div class="drop-zone" id="dz-fat">
+          <input type="file" accept=".xlsx,.xls,.csv" onchange="loadFile('fat',this)">
+          <i class="ti ti-upload"></i>
+          <div class="dz-title">Relatório de Faturamento / NF-e / Pedidos</div>
+          <div class="dz-sub">Arraste ou clique · .xlsx · .xls · .csv</div>
+        </div>
+        <div class="map-section" id="map-fat">
+          <div class="map-title"><i class="ti ti-adjustments"></i>Mapeie as colunas da planilha</div>
+          <div class="col-grid">
+            <div class="col-item"><label>Data Emissão</label><select id="ft-data"></select></div>
+            <div class="col-item"><label>Cliente</label><select id="ft-cli"></select></div>
+            <div class="col-item"><label>Valor Total</label><select id="ft-val"></select></div>
+            <div class="col-item"><label>Nº NF / Pedido</label><select id="ft-num"></select></div>
+            <div class="col-item"><label>Tipo (NF/Pedido/Dev)</label><select id="ft-tipo"></select></div>
+            <div class="col-item"><label>Status</label><select id="ft-st"></select></div>
+            <div class="col-item"><label>Devoluções (valor)</label><select id="ft-dev"></select></div>
+            <div class="col-item"><label>Observação</label><select id="ft-obs"></select></div>
+          </div>
+          <div class="uni-row">
+            <label>Unidade padrão:</label>
+            <select id="ft-uni"><option value="Matriz">Matriz</option><option value="Filial">Filial</option><option value="col">Ler da coluna →</option></select>
+            <select id="ft-uni-col" style="display:none"></select>
+          </div>
+          <div class="map-title" style="margin-top:4px"><i class="ti ti-eye"></i>Prévia (8 linhas)</div>
+          <div class="preview-box" id="prev-fat"></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="doImport('fat')"><i class="ti ti-file-import"></i>Importar lançamentos</button>
+            <button class="btn btn-ghost" onclick="resetImp('fat')"><i class="ti ti-x"></i>Cancelar</button>
+          </div>
+        </div>
+        <div class="imp-status" id="ist-fat"></div>
+      </div>
+
+      <!-- ── FLUXO ── -->
+      <div class="imp-panel" id="ipanel-flx">
+        <div class="drop-zone" id="dz-flx">
+          <input type="file" accept=".xlsx,.xls,.csv" onchange="loadFile('flx',this)">
+          <i class="ti ti-upload"></i>
+          <div class="dz-title">Relatório de Fluxo de Caixa</div>
+          <div class="dz-sub">Arraste ou clique · .xlsx · .xls · .csv · Entradas e saídas confirmadas</div>
+        </div>
+        <div class="map-section" id="map-flx">
+          <div class="map-title"><i class="ti ti-adjustments"></i>Mapeie as colunas da planilha</div>
+          <div class="col-grid">
+            <div class="col-item"><label>Data</label><select id="fx-data"></select></div>
+            <div class="col-item"><label>Descrição / Nome</label><select id="fx-desc"></select></div>
+            <div class="col-item"><label>Valor</label><select id="fx-val"></select></div>
+            <div class="col-item"><label>Tipo (Entrada/Saída)</label><select id="fx-tipo"></select></div>
+            <div class="col-item"><label>Categoria</label><select id="fx-cat"></select></div>
+            <div class="col-item"><label>Conta Bancária</label><select id="fx-conta"></select></div>
+            <div class="col-item"><label>Status</label><select id="fx-st"></select></div>
+            <div class="col-item"><label>Observação</label><select id="fx-obs"></select></div>
+          </div>
+          <div class="uni-row">
+            <label>Unidade padrão:</label>
+            <select id="fx-uni"><option value="Matriz">Matriz</option><option value="Filial">Filial</option><option value="col">Ler da coluna →</option></select>
+            <select id="fx-uni-col" style="display:none"></select>
+          </div>
+          <div class="map-title" style="margin-top:4px"><i class="ti ti-eye"></i>Prévia (8 linhas)</div>
+          <div class="preview-box" id="prev-flx"></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="doImport('flx')"><i class="ti ti-file-import"></i>Importar lançamentos</button>
+            <button class="btn btn-ghost" onclick="resetImp('flx')"><i class="ti ti-x"></i>Cancelar</button>
+          </div>
+        </div>
+        <div class="imp-status" id="ist-flx"></div>
+      </div>
+
+    </div><!-- /tcard -->
+
+    <div class="tcard" style="margin-top:14px" id="imp-summary">
+      <div class="tcard-hdr"><div class="tcard-title"><i class="ti ti-database"></i>Dados carregados manualmente</div>
+        <button class="btn btn-danger" onclick="clearAllImported()"><i class="ti ti-trash"></i>Limpar tudo</button>
+      </div>
+      <div style="padding:12px 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px" id="imp-summary-grid"></div>
+    </div>
+
+  </div>
+
+</div><!-- /main -->
+
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
