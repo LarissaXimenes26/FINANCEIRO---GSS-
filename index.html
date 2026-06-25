@@ -382,15 +382,121 @@ h1,h2,h3{font-family:'Sora',sans-serif}
 /* LOADING */
 .loading{text-align:center;padding:32px;color:var(--muted)}
 
+/* USUÁRIOS — form */
+.usr-form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:4px}
+.form-field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.form-field.full{grid-column:1 / -1}
+.form-label{font-size:11px;font-weight:700;color:var(--dim);
+  text-transform:uppercase;letter-spacing:1.1px}
+.form-input{width:100%;padding:10px 12px;border-radius:11px;
+  border:1px solid var(--line-soft);background:rgba(13,23,39,.7);color:var(--text);
+  font:13px 'Manrope',system-ui,sans-serif}
+.form-input:focus{outline:none;border-color:rgba(56,189,248,.5)}
+.form-input::placeholder{color:var(--muted)}
+select.form-input{cursor:pointer;color-scheme:dark}
+
+/* campo de senha com botão "espiar" */
+.pw-wrap{position:relative;display:block}
+.pw-wrap .form-input{padding-right:40px}
+.pw-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  width:30px;height:30px;border:none;border-radius:8px;background:transparent;
+  color:var(--muted);cursor:pointer;display:grid;place-items:center;
+  font-size:16px;transition:color .15s,background .15s}
+.pw-eye:hover{color:var(--text);background:rgba(255,255,255,.06)}
+
+/* USUÁRIOS — toggle switch */
+.switch{position:relative;display:inline-block;width:42px;height:24px;cursor:pointer;flex-shrink:0}
+.switch input{position:absolute;opacity:0;width:0;height:0}
+.switch .slider{position:absolute;inset:0;border-radius:999px;
+  background:rgba(251,113,133,.22);border:1px solid rgba(251,113,133,.4);
+  transition:background .18s,border-color .18s}
+.switch .slider::before{content:'';position:absolute;top:50%;left:3px;transform:translateY(-50%);
+  width:16px;height:16px;border-radius:50%;background:var(--red);transition:left .18s,background .18s}
+.switch input:checked + .slider{background:rgba(52,211,153,.22);border-color:rgba(52,211,153,.45)}
+.switch input:checked + .slider::before{left:21px;background:var(--green)}
+
+/* USUÁRIOS — toolbar topo */
+.usr-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+
+/* USUÁRIOS — botões de ação em linha */
+.usr-act{width:32px;height:32px;border-radius:9px;border:1px solid var(--line-soft);
+  background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;
+  display:inline-grid;place-items:center;transition:all .16s;vertical-align:middle;margin-left:4px}
+.usr-act:hover{background:rgba(255,255,255,.09);color:var(--text)}
+.usr-act.del{color:var(--red);background:rgba(251,113,133,.07)}
+.usr-act.del:hover{background:rgba(251,113,133,.18);border-color:rgba(251,113,133,.4)}
+.usr-act svg{width:16px;height:16px}
+
+/* ícone inline em botões/spans */
+.btn-ico{display:inline-flex;align-items:center}
+.btn-ico svg{width:16px;height:16px}
+.pw-eye svg{width:17px;height:17px}
+
+/* MODAL genérico */
+.modal-overlay{position:fixed;inset:0;z-index:90;display:none;
+  align-items:flex-start;justify-content:center;padding:48px 20px;overflow-y:auto;
+  background:rgba(4,9,18,.66);backdrop-filter:blur(3px)}
+.modal-overlay.show{display:flex}
+.modal-card{width:100%;max-width:640px;border-radius:var(--radius);padding:24px;
+  background:linear-gradient(180deg,var(--surface2),var(--surface));
+  border:1px solid var(--line-soft);box-shadow:0 28px 70px -22px rgba(0,0,0,.75);
+  animation:modalIn .2s cubic-bezier(.22,1,.36,1)}
+@keyframes modalIn{from{opacity:0;transform:translateY(-10px) scale(.98)}to{opacity:1;transform:none}}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}
+
+/* LOGIN overlay */
+.login-overlay{position:fixed;inset:0;z-index:100;display:none;
+  align-items:center;justify-content:center;padding:24px;
+  background:radial-gradient(1200px 600px at 78% -8%, rgba(56,189,248,.12), transparent 60%),
+    linear-gradient(180deg,var(--bg-grad-1),var(--bg-grad-2))}
+.login-overlay.show{display:flex}
+.login-card{width:100%;max-width:380px;border-radius:var(--radius);padding:30px 28px;
+  background:linear-gradient(180deg,var(--surface2),var(--surface));
+  border:1px solid var(--line-soft);box-shadow:0 24px 60px -20px rgba(0,0,0,.7)}
+.login-head{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.login-head .logo-icon{width:42px;height:42px}
+.login-head strong{font-family:'Sora';font-size:16px;font-weight:700;display:block;line-height:1.1}
+.login-head span{font-size:11.5px;color:var(--dim)}
+.login-card .form-field{margin-bottom:14px}
+.login-hint{font-size:11.5px;color:var(--dim);margin-top:14px;line-height:1.5;
+  padding:10px 12px;border-radius:9px;background:rgba(56,189,248,.06);
+  border:1px solid rgba(56,189,248,.14)}
+.login-hint b{color:var(--brand)}
+
 /* RESPONSIVE */
 @media(max-width:1180px){.fin-bottom{grid-template-columns:1fr}}
 @media(max-width:980px){
   .kpi-grid,.fin-kpi-grid,.summary{grid-template-columns:1fr}
+  .usr-form-grid{grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-card">
+    <div class="login-head">
+      <div class="logo-icon">G</div>
+      <div><strong>GSS</strong><span>Golf Ship Solutions</span></div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">E-mail</label>
+      <input type="email" class="form-input" id="login-email" placeholder="seu@email.com"
+        autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="form-field">
+      <label class="form-label">Senha</label>
+      <input type="password" class="form-input" id="login-senha" placeholder="••••••••"
+        autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-primary" id="login-btn" style="width:100%;justify-content:center;margin-top:4px"
+      onclick="doLogin()"><span class="btn-ico" data-ico="login"></span>Entrar</button>
+    <div class="imp-status" id="login-status"></div>
+    <div class="login-hint" id="login-hint" style="display:none"></div>
+  </div>
+</div>
 
 <aside class="sidebar">
   <div class="sidebar-logo">
@@ -421,8 +527,17 @@ h1,h2,h3{font-family:'Sora',sans-serif}
     <button class="nav-btn" id="nav-view" onclick="showPage('view')">
       <i class="ti ti-table"></i>Visualizar
     </button>
+    <div class="sidebar-section" id="sec-admin">Administração</div>
+    <button class="nav-btn" id="nav-usuarios" onclick="showPage('usuarios')">
+      <i class="ti ti-users"></i>Usuários
+    </button>
   </div>
-  <div class="sidebar-footer"><span class="pulse"></span> Dados sincronizados · Omie ERP</div>
+  <div class="sidebar-footer" style="flex-direction:column;align-items:stretch;gap:10px">
+    <button class="nav-btn" id="nav-logout" onclick="logout()" style="color:var(--red)">
+      <span class="btn-ico" data-ico="logout"></span><span id="logout-label">Sair</span>
+    </button>
+    <span><span class="pulse"></span> Dados sincronizados · Omie ERP</span>
+  </div>
 </aside>
 
 <div class="main">
@@ -643,6 +758,80 @@ h1,h2,h3{font-family:'Sora',sans-serif}
     </table>
   </div>
   <div class="pag" id="pag"></div>
+</div>
+
+<!-- PAGE: USUÁRIOS -->
+<div class="page" id="page-usuarios">
+  <div class="usr-toolbar">
+    <div class="sec-title" style="margin:0">Usuários cadastrados</div>
+    <button class="btn btn-primary" onclick="openUserModal()">
+      <span class="btn-ico" data-ico="userPlus"></span>Novo usuário
+    </button>
+  </div>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Nome</th><th>E-mail</th><th>Função</th><th>Status</th>
+          <th style="text-align:center">Bloquear</th><th style="text-align:right">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="usr-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL: NOVO/EDITAR USUÁRIO -->
+<div class="modal-overlay" id="usr-modal" onclick="if(event.target===this)closeUserModal()">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="fin-card-title" id="usr-form-title">Novo usuário</div>
+        <div class="fin-card-sub" id="usr-form-sub" style="margin-bottom:0">Cadastre um usuário com acesso ao painel</div>
+      </div>
+      <button class="usr-act" title="Fechar" onclick="closeUserModal()"><span class="btn-ico" data-ico="close"></span></button>
+    </div>
+    <div class="usr-form-grid">
+      <div class="form-field">
+        <label class="form-label">Nome</label>
+        <input type="text" class="form-input" id="usr-nome" placeholder="Nome completo">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Função</label>
+        <select class="form-input" id="usr-role">
+          <option value="admin">Administrador</option>
+          <option value="viewer">Visualizador</option>
+        </select>
+      </div>
+      <div class="form-field full">
+        <label class="form-label">E-mail</label>
+        <input type="email" class="form-input" id="usr-email" placeholder="usuario@email.com" autocomplete="off">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Senha</label>
+        <div class="pw-wrap">
+          <input type="password" class="form-input" id="usr-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          <button type="button" class="pw-eye" title="Mostrar senha" onclick="togglePw(this,'usr-senha')"><span class="btn-ico" data-ico="eye"></span></button>
+        </div>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Confirmar senha</label>
+        <div class="pw-wrap">
+          <input type="password" class="form-input" id="usr-senha2" placeholder="Repita a senha" autocomplete="new-password">
+          <button type="button" class="pw-eye" title="Mostrar senha" onclick="togglePw(this,'usr-senha2')"><span class="btn-ico" data-ico="eye"></span></button>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="usr-save" onclick="saveUser()">
+        <span class="btn-ico" data-ico="save"></span>Salvar
+      </button>
+      <button class="btn btn-ghost" onclick="closeUserModal()">
+        <span class="btn-ico" data-ico="close"></span>Cancelar
+      </button>
+    </div>
+    <div class="imp-status" id="usr-status"></div>
+  </div>
 </div>
 
 <script>
@@ -915,8 +1104,8 @@ async function showPage(name) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
-  const titles = { import: 'Importar Planilha', view: 'Visualizar Dados', dashboard: 'Dashboard', financeiro: 'Financeiro', fluxo: 'Fluxo de Caixa', faturamento: 'Faturamento' };
-  const eyebrows = { import: 'Planilhas', view: 'Planilhas', dashboard: 'Painel de controle', financeiro: 'Painel de controle', fluxo: 'Painel de controle', faturamento: 'Painel de controle' };
+  const titles = { import: 'Importar Planilha', view: 'Visualizar Dados', dashboard: 'Dashboard', financeiro: 'Financeiro', fluxo: 'Fluxo de Caixa', faturamento: 'Faturamento', usuarios: 'Usuários' };
+  const eyebrows = { import: 'Planilhas', view: 'Planilhas', dashboard: 'Painel de controle', financeiro: 'Painel de controle', fluxo: 'Painel de controle', faturamento: 'Painel de controle', usuarios: 'Administração' };
   document.getElementById('topbar-title').textContent = titles[name] || name;
   document.getElementById('topbar-eyebrow').textContent = eyebrows[name] || 'GSS';
   // tab bar only visible for import/view
@@ -1033,6 +1222,16 @@ const FIN_SVG = {
   inflow:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8m0 0 3-3m-3 3-3-3"/></svg>',
   outflow:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16V8m0 0 3 3m-3-3-3 3"/></svg>',
   wallet:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a3 3 0 0 1-3-2Z"/><circle cx="16.5" cy="13" r="1.2" fill="currentColor" stroke="none"/></svg>',
+  pencil:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="M13.5 6.5l3 3"/></svg>',
+  trash:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-13M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>',
+  eye:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.6"/></svg>',
+  eyeOff:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18"/><path d="M10.6 6.2A9.7 9.7 0 0 1 12 5.5c6.5 0 10 6.5 10 6.5a17 17 0 0 1-2.9 3.6M6.4 6.5A17 17 0 0 0 2 12s3.5 6.5 10 6.5a9.7 9.7 0 0 0 3.3-.6"/><path d="M9.5 9.6a3 3 0 0 0 4.2 4.2"/></svg>',
+  close:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  userPlus:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg>',
+  save:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v4h7V4M8 20v-6h8v6"/></svg>',
+  login:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5M15 12H3"/></svg>',
+  logout:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M10 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>',
+  userOff:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.2"/><path d="M6 21a6 6 0 0 1 10.5-4M3 3l18 18"/></svg>',
 };
 function finKpiCard(label, val, count, clr, svg, max) {
   const pct = max ? Math.round(val/max*100) : 0;
@@ -1602,6 +1801,7 @@ async function applyPage(name) {
   if (name === 'financeiro') { await applyFinFilters(); return; }
   if (name === 'fluxo')       { await applyFlxFilters(); return; }
   if (name === 'faturamento') { await applyFatFilters(); return; }
+  if (name === 'usuarios')    { resetUserForm(); await loadUsers(); return; }
   const def = DEFS[T];
   if (name === 'import') {
     document.getElementById('dz-title').textContent = def.title;
@@ -2054,9 +2254,304 @@ function goPage(p) {
   renderPage();
 }
 
+// ══ USUÁRIOS (CRUD interno) ════════════════════════════════════════════════════
+let usersCache = [];
+let editingUserId = null;
+let currentUser = null;   // { id, nome, email, role }
+
+const ROLE_LABEL = { admin: 'Administrador', viewer: 'Visualizador' };
+
+// SHA-256 (hex) via Web Crypto
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function usrStatus(msg, kind) {
+  const s = document.getElementById('usr-status');
+  s.className = 'imp-status show' + (kind ? ' ' + kind : '');
+  s.textContent = msg;
+}
+
+// Retorna o SVG inline de um ícone do FIN_SVG (independe da webfont)
+function ICO(name) { return FIN_SVG[name] || ''; }
+
+// Preenche todos os <span data-ico="..."> com seu SVG (botões estáticos do HTML)
+function paintIcons() {
+  document.querySelectorAll('[data-ico]').forEach(el => {
+    if (!el.dataset.painted) { el.innerHTML = ICO(el.dataset.ico); el.dataset.painted = '1'; }
+  });
+}
+
+// Alterna mostrar/ocultar a senha do input alvo
+function togglePw(btn, inputId) {
+  const inp = document.getElementById(inputId);
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  btn.innerHTML = ICO(show ? 'eyeOff' : 'eye');
+  btn.title = show ? 'Ocultar senha' : 'Mostrar senha';
+}
+
+async function loadUsers() {
+  const tb = document.getElementById('usr-tbody');
+  tb.innerHTML = `<tr><td colspan="6" class="loading">Carregando usuários…</td></tr>`;
+  const { data, error } = await sb.from('gss_usuarios').select('*').order('nome', { ascending: true });
+  if (error) {
+    tb.innerHTML = `<tr><td colspan="6" class="empty">
+      <span style="display:inline-block;width:30px;color:var(--dim);margin-bottom:6px">${ICO('alert')}</span><br>
+      Não foi possível carregar. Rode o supabase-usuarios.sql.<br>
+      <span style="font-size:11px">${esc(error.message)}</span></td></tr>`;
+    usersCache = [];
+    return;
+  }
+  usersCache = data || [];
+  renderUsers();
+}
+
+function renderUsers() {
+  const tb = document.getElementById('usr-tbody');
+  if (!usersCache.length) {
+    tb.innerHTML = `<tr><td colspan="6" class="empty">
+      <span style="display:inline-block;width:30px;color:var(--dim);margin-bottom:6px">${ICO('userOff')}</span><br>
+      Nenhum usuário cadastrado.</td></tr>`;
+    return;
+  }
+  tb.innerHTML = usersCache.map(u => {
+    const isSelf = currentUser && currentUser.id === u.id;
+    const roleBadge = u.role === 'admin' ? 'b-rec' : 'b-pago';
+    const statusBadge = u.bloqueado ? 'b-atras' : 'b-pago';
+    const statusTxt = u.bloqueado ? 'Bloqueado' : 'Ativo';
+    return `<tr>
+      <td style="font-weight:600;color:var(--text)">${esc(u.nome)}${isSelf ? ' <span class="hist-tag" style="margin-left:6px">você</span>' : ''}</td>
+      <td style="color:var(--muted)">${esc(u.email)}</td>
+      <td><span class="badge ${roleBadge}">${ROLE_LABEL[u.role] || u.role}</span></td>
+      <td><span class="badge ${statusBadge}">${statusTxt}</span></td>
+      <td style="text-align:center">
+        <label class="switch" title="${u.bloqueado ? 'Desbloquear' : 'Bloquear'}">
+          <input type="checkbox" ${u.bloqueado ? '' : 'checked'}
+            data-id="${u.id}" onchange="toggleBlock(this)">
+          <span class="slider"></span>
+        </label>
+      </td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="usr-act" title="Editar" data-id="${u.id}" onclick="editUser(this.dataset)">${ICO('pencil')}</button>
+        <button class="usr-act del" title="Excluir" data-id="${u.id}" data-nome="${esc(u.nome)}" onclick="deleteUser(this.dataset)">${ICO('trash')}</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function resetUserForm() {
+  editingUserId = null;
+  document.getElementById('usr-form-title').textContent = 'Novo usuário';
+  document.getElementById('usr-form-sub').textContent = 'Cadastre um usuário com acesso ao painel';
+  ['usr-nome', 'usr-email', 'usr-senha', 'usr-senha2'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('usr-role').value = 'viewer';
+  document.getElementById('usr-senha').placeholder = 'Mínimo 6 caracteres';
+  document.getElementById('usr-senha2').placeholder = 'Repita a senha';
+  document.getElementById('usr-status').className = 'imp-status';
+}
+
+// Garante que os campos de senha voltem a ficar ocultos (e o olho como "mostrar")
+function resetPwEyes() {
+  ['usr-senha', 'usr-senha2'].forEach(id => {
+    const inp = document.getElementById(id);
+    inp.type = 'password';
+    const btn = inp.parentElement.querySelector('.pw-eye');
+    if (btn) { btn.innerHTML = ICO('eye'); btn.title = 'Mostrar senha'; }
+  });
+}
+
+function openUserModal() {
+  resetUserForm();
+  resetPwEyes();
+  document.getElementById('usr-modal').classList.add('show');
+  document.getElementById('usr-nome').focus();
+}
+
+function closeUserModal() {
+  document.getElementById('usr-modal').classList.remove('show');
+}
+
+function editUser(ds) {
+  const u = usersCache.find(x => x.id === Number(ds.id));
+  if (!u) return;
+  editingUserId = u.id;
+  document.getElementById('usr-form-title').textContent = 'Editar usuário';
+  document.getElementById('usr-form-sub').textContent = 'Deixe a senha em branco para mantê-la';
+  document.getElementById('usr-nome').value  = u.nome;
+  document.getElementById('usr-email').value = u.email;
+  document.getElementById('usr-role').value  = u.role;
+  document.getElementById('usr-senha').value  = '';
+  document.getElementById('usr-senha2').value = '';
+  document.getElementById('usr-senha').placeholder  = 'Em branco mantém a atual';
+  document.getElementById('usr-senha2').placeholder = 'Em branco mantém a atual';
+  document.getElementById('usr-status').className = 'imp-status';
+  resetPwEyes();
+  document.getElementById('usr-modal').classList.add('show');
+}
+
+async function saveUser() {
+  const nome   = document.getElementById('usr-nome').value.trim();
+  const email  = document.getElementById('usr-email').value.trim().toLowerCase();
+  const role   = document.getElementById('usr-role').value;
+  const senha  = document.getElementById('usr-senha').value;
+  const senha2 = document.getElementById('usr-senha2').value;
+
+  if (!nome)  return usrStatus('✗ Informe o nome.', 'err');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return usrStatus('✗ E-mail inválido.', 'err');
+  // e-mail único (ignorando o próprio em edição)
+  if (usersCache.some(u => u.email.toLowerCase() === email && u.id !== editingUserId))
+    return usrStatus('✗ Já existe um usuário com este e-mail.', 'err');
+  const needsPass = editingUserId === null;
+  if (needsPass || senha || senha2) {
+    if (senha.length < 6) return usrStatus('✗ A senha deve ter ao menos 6 caracteres.', 'err');
+    if (senha !== senha2) return usrStatus('✗ As senhas não conferem.', 'err');
+  }
+
+  const btn = document.getElementById('usr-save');
+  btn.disabled = true;
+  usrStatus('Salvando…');
+  try {
+    if (editingUserId === null) {
+      const senha_hash = await sha256(senha);
+      const { error } = await sb.from('gss_usuarios')
+        .insert({ nome, email, role, senha_hash, bloqueado: false });
+      if (error) throw new Error(error.message);
+    } else {
+      const patch = { nome, email, role, atualizado_em: new Date().toISOString() };
+      if (senha) patch.senha_hash = await sha256(senha);
+      const { error } = await sb.from('gss_usuarios').update(patch).eq('id', editingUserId);
+      if (error) throw new Error(error.message);
+    }
+    closeUserModal();
+    await loadUsers();
+  } catch (err) {
+    const dup = /duplicate|unique/i.test(err.message);
+    usrStatus('✗ ' + (dup ? 'Já existe um usuário com este e-mail.' : err.message), 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function deleteUser(ds) {
+  const id = Number(ds.id), nome = ds.nome;
+  if (currentUser && currentUser.id === id) return alert('Você não pode excluir o próprio usuário.');
+  const admins = usersCache.filter(u => u.role === 'admin');
+  const target = usersCache.find(u => u.id === id);
+  if (target && target.role === 'admin' && admins.length <= 1)
+    return alert('Não é possível excluir o último administrador.');
+  if (!confirm(`Excluir o usuário "${nome}"?\nEsta ação não pode ser desfeita.`)) return;
+  const { error } = await sb.from('gss_usuarios').delete().eq('id', id);
+  if (error) { alert('Erro ao excluir: ' + error.message); return; }
+  await loadUsers();
+}
+
+async function toggleBlock(el) {
+  const id = Number(el.dataset.id);
+  const willBlock = !el.checked;   // checked = ativo; desmarcar = bloquear
+  const u = usersCache.find(x => x.id === id);
+  // proteções: não bloquear a si mesmo nem o último admin ativo
+  if (willBlock && currentUser && currentUser.id === id) {
+    el.checked = true; return alert('Você não pode bloquear o próprio usuário.');
+  }
+  if (willBlock && u && u.role === 'admin') {
+    const activeAdmins = usersCache.filter(x => x.role === 'admin' && !x.bloqueado);
+    if (activeAdmins.length <= 1) { el.checked = true; return alert('Não é possível bloquear o último administrador ativo.'); }
+  }
+  const { error } = await sb.from('gss_usuarios')
+    .update({ bloqueado: willBlock, atualizado_em: new Date().toISOString() }).eq('id', id);
+  if (error) { el.checked = !el.checked; alert('Erro: ' + error.message); return; }
+  if (u) u.bloqueado = willBlock;
+  renderUsers();
+}
+
+// ══ LOGIN / SESSÃO ═════════════════════════════════════════════════════════════
+function loginStatus(msg, kind) {
+  const s = document.getElementById('login-status');
+  s.className = 'imp-status show' + (kind ? ' ' + kind : '');
+  s.textContent = msg;
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const senha = document.getElementById('login-senha').value;
+  if (!email || !senha) return loginStatus('✗ Preencha e-mail e senha.', 'err');
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  loginStatus('Entrando…');
+  try {
+    const { data, error } = await sb.from('gss_usuarios').select('*').ilike('email', email).limit(1);
+    if (error) throw new Error(error.message);
+    const u = (data || [])[0];
+    if (!u) { loginStatus('✗ E-mail ou senha inválidos.', 'err'); return; }
+    if (u.bloqueado) { loginStatus('✗ Usuário bloqueado. Contate um administrador.', 'err'); return; }
+    const hash = await sha256(senha);
+    if (hash !== u.senha_hash) { loginStatus('✗ E-mail ou senha inválidos.', 'err'); return; }
+    currentUser = { id: u.id, nome: u.nome, email: u.email, role: u.role };
+    sessionStorage.setItem('gss_user', JSON.stringify(currentUser));
+    enterApp();
+  } catch (err) {
+    loginStatus('✗ ' + err.message + ' (rodou o supabase-usuarios.sql?)', 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('gss_user');
+  currentUser = null;
+  document.getElementById('login-senha').value = '';
+  loginStatus('', '');
+  document.getElementById('login-status').className = 'imp-status';
+  document.getElementById('login-overlay').classList.add('show');
+}
+
+function applyRoleUI() {
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  document.getElementById('sec-admin').style.display   = isAdmin ? '' : 'none';
+  document.getElementById('nav-usuarios').style.display = isAdmin ? '' : 'none';
+  const ll = document.getElementById('logout-label');
+  if (ll && currentUser) ll.textContent = 'Sair · ' + currentUser.nome.split(' ')[0];
+}
+
+async function enterApp() {
+  document.getElementById('login-overlay').classList.remove('show');
+  applyRoleUI();
+  await showPage('dashboard');
+}
+
+// Dica do admin inicial, se a tabela estiver vazia
+async function maybeShowSeedHint() {
+  try {
+    const { count } = await sb.from('gss_usuarios').select('id', { count: 'exact', head: true });
+    if (count === 0) {
+      const h = document.getElementById('login-hint');
+      h.style.display = 'block';
+      h.innerHTML = 'Tabela vazia. Use o admin inicial do SQL: <b>admin@gss.local</b> / <b>admin123</b>.';
+    }
+  } catch (_) {}
+}
+
+// Fecha o modal de usuário com a tecla Esc
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeUserModal();
+});
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async () => {
-  await showPage('dashboard');
+  paintIcons();   // preenche os ícones SVG dos botões estáticos
+  const saved = sessionStorage.getItem('gss_user');
+  if (saved) {
+    try { currentUser = JSON.parse(saved); } catch (_) { currentUser = null; }
+  }
+  if (currentUser) {
+    await enterApp();
+  } else {
+    document.getElementById('login-overlay').classList.add('show');
+    document.getElementById('login-email').focus();
+    maybeShowSeedHint();
+  }
 })();
 </script>
 </div><!-- /.main -->
