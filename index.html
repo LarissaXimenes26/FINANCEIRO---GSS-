@@ -141,7 +141,7 @@ h1,h2,h3{font-family:'Sora',sans-serif}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.5)}70%{box-shadow:0 0 0 7px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
 
 /* MAIN */
-.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow-y:auto}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow-y:auto;scrollbar-gutter:stable}
 .topbar{position:sticky;top:0;z-index:10;padding:18px 34px;
   border-bottom:1px solid var(--line-soft);
   background:linear-gradient(180deg,var(--topbar-grad-1),var(--topbar-grad-2));
@@ -151,7 +151,7 @@ h1,h2,h3{font-family:'Sora',sans-serif}
 .topbar-eyebrow{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--brand-text);
   text-transform:uppercase;margin-bottom:4px;display:block}
 /* THEME SWITCH (liga/desliga: esquerda = clean, direita = dark) */
-.theme-switch{margin-left:auto;position:relative;flex-shrink:0;
+.theme-switch{position:relative;flex-shrink:0;
   width:66px;height:34px;border-radius:999px;cursor:pointer;padding:0;
   border:1px solid var(--line-soft);background:var(--pill-group-bg);
   display:inline-flex;align-items:center;justify-content:space-between;
@@ -175,6 +175,39 @@ h1,h2,h3{font-family:'Sora',sans-serif}
 body.theme-clean .theme-switch-knob{left:3px}
 body.theme-clean .theme-switch-ico.sun{opacity:.85}
 body.theme-clean .theme-switch-ico.moon{opacity:.5}
+/* TOPBAR RIGHT (switch de tema + usuário logado) */
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.topbar-user-wrap{position:relative}
+.topbar-user{display:flex;align-items:center;gap:10px;cursor:pointer;
+  padding:5px 10px 5px 5px;border-radius:999px;
+  border:1px solid var(--line-soft);background:var(--surface2);
+  transition:background .18s,border-color .18s}
+.topbar-user:hover{background:var(--surface-hi);border-color:var(--line)}
+.topbar-user-avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  display:grid;place-items:center;font-family:'Sora';font-weight:700;font-size:14px;
+  color:#04121f;background:linear-gradient(135deg,var(--brand),#22D3EE);
+  box-shadow:0 2px 8px -3px rgba(56,189,248,.7)}
+.topbar-user-info{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+.topbar-user-name{font-size:13px;font-weight:700;color:var(--text);
+  white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.topbar-user-role{font-size:11px;color:var(--muted);white-space:nowrap}
+.topbar-user-chevron{color:var(--muted2);margin-left:2px;transition:transform .18s}
+.topbar-user-chevron svg{width:16px;height:16px}
+.topbar-user-wrap.open .topbar-user-chevron{transform:rotate(180deg)}
+/* menu dropdown (aparece embaixo ao clicar no usuário) */
+.topbar-user-menu{position:absolute;top:calc(100% + 8px);right:0;min-width:160px;
+  background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;
+  box-shadow:0 18px 40px -18px rgba(0,0,0,.55);padding:6px;z-index:50;
+  opacity:0;visibility:hidden;transform:translateY(-6px);
+  transition:opacity .16s,transform .16s,visibility .16s}
+.topbar-user-wrap.open .topbar-user-menu{opacity:1;visibility:visible;transform:translateY(0)}
+.topbar-user-menu-item{width:100%;display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border:none;border-radius:9px;cursor:pointer;background:transparent;
+  color:var(--red);font:600 13px 'Manrope',system-ui,sans-serif;text-align:left;
+  transition:background .16s}
+.topbar-user-menu-item:hover{background:var(--red-dim)}
+.topbar-user-menu-item svg{width:17px;height:17px}
+@media (max-width:640px){.topbar-user-info{display:none}}
 
 /* PAGES */
 .page{display:none;padding:28px 34px 48px;max-width:1480px;width:100%}
@@ -622,9 +655,6 @@ select.form-input{cursor:pointer;color-scheme:var(--date-scheme)}
     </button>
   </div>
   <div class="sidebar-footer" style="flex-direction:column;align-items:stretch;gap:10px">
-    <button class="nav-btn" id="nav-logout" onclick="logout()" style="color:var(--red)">
-      <span class="btn-ico" data-ico="logout"></span><span id="logout-label">Sair</span>
-    </button>
     <span id="app-version" style="font-size:11px;color:var(--muted2);letter-spacing:.3px"></span>
   </div>
 </aside>
@@ -635,14 +665,32 @@ select.form-input{cursor:pointer;color-scheme:var(--date-scheme)}
       <span class="topbar-eyebrow" id="topbar-eyebrow">Painel de controle</span>
       <span class="topbar-title" id="topbar-title">Importar Planilha</span>
     </div>
-    <button class="theme-switch" id="theme-toggle" onclick="toggleTheme()" role="switch"
-      aria-checked="false" title="Alternar tema" aria-label="Alternar tema (clean / dark)">
-      <span class="theme-switch-ico sun"  data-ico="sun"></span>
-      <span class="theme-switch-ico moon" data-ico="moon"></span>
-      <span class="theme-switch-knob" id="theme-knob">
-        <span class="btn-ico" id="theme-knob-ico" data-ico="moon"></span>
-      </span>
-    </button>
+    <div class="topbar-right">
+      <button class="theme-switch" id="theme-toggle" onclick="toggleTheme()" role="switch"
+        aria-checked="false" title="Alternar tema" aria-label="Alternar tema (clean / dark)">
+        <span class="theme-switch-ico sun"  data-ico="sun"></span>
+        <span class="theme-switch-ico moon" data-ico="moon"></span>
+        <span class="theme-switch-knob" id="theme-knob">
+          <span class="btn-ico" id="theme-knob-ico" data-ico="moon"></span>
+        </span>
+      </button>
+      <div class="topbar-user-wrap" id="topbar-user-wrap">
+        <div class="topbar-user" id="topbar-user" title="Conta" onclick="toggleUserMenu(event)"
+          role="button" aria-haspopup="true" aria-expanded="false">
+          <span class="topbar-user-avatar" id="tu-avatar">?</span>
+          <span class="topbar-user-info">
+            <span class="topbar-user-name" id="tu-name">—</span>
+            <span class="topbar-user-role" id="tu-role">—</span>
+          </span>
+          <span class="btn-ico topbar-user-chevron" data-ico="chevronDown"></span>
+        </div>
+        <div class="topbar-user-menu" id="topbar-user-menu">
+          <button class="topbar-user-menu-item" onclick="logout()">
+            <span class="btn-ico" data-ico="logout"></span>Sair
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="tab-bar" id="tab-bar">
@@ -931,7 +979,7 @@ select.form-input{cursor:pointer;color-scheme:var(--date-scheme)}
 // ── Versão do app ─────────────────────────────────────────────────────────────
 // Fonte única da versão. Ao publicar uma nova versão: atualize aqui (SemVer),
 // comite e crie a tag git correspondente (ex.: git tag -a v1.1.0).
-const APP_VERSION = 'v1.1.0';
+const APP_VERSION = 'v1.2.0';
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 const SB_URL = 'https://mbtwhghgqifjkgskrzlr.supabase.co';
@@ -1213,6 +1261,32 @@ async function showPage(name) {
 
 // ── Tema: alterna entre dark (padrão) e clean (claro) ─────────────────────────
 // Sem persistência: sempre inicia em dark; o toggle vale só para a sessão.
+// Atualiza as cores dos gráficos vivos in-place, sem recriar nem refazer queries.
+function applyChartTheme() {
+  const ct = chartTheme();
+  [finChart, flxChart, fatChart].forEach(ch => {
+    if (!ch) return;
+    ch.data.datasets.forEach(ds => {
+      if (ds._roles) ds.backgroundColor = ds._roles.map(r => ct[r]);
+    });
+    const o = ch.options;
+    if (o.plugins && o.plugins.tooltip) {
+      o.plugins.tooltip.backgroundColor = ct.tip;
+      o.plugins.tooltip.titleColor = ct.tipText;
+      o.plugins.tooltip.bodyColor = ct.tipText;
+    }
+    if (o.scales) {
+      for (const ax of ['x','y']) {
+        if (o.scales[ax]) {
+          if (o.scales[ax].grid)  o.scales[ax].grid.color  = ct.grid;
+          if (o.scales[ax].ticks) o.scales[ax].ticks.color = ct.tick;
+        }
+      }
+    }
+    ch.update('none');   // sem animação → sem flash/layout shift
+  });
+}
+
 function toggleTheme() {
   const clean = document.body.classList.toggle('theme-clean');
   // aria-checked=true quando clean (knob à esquerda / "ligado")
@@ -1221,10 +1295,29 @@ function toggleTheme() {
   // ícone dentro do knob: sol no clean, lua no dark
   const knobIco = document.getElementById('theme-knob-ico');
   if (knobIco) knobIco.innerHTML = ICO(clean ? 'sun' : 'moon');
-  // Re-renderiza a página ativa para os gráficos pegarem as cores do novo tema.
-  const active = document.querySelector('.page.active');
-  if (active && active.id.startsWith('page-')) showPage(active.id.slice(5));
+  // Todo o resto (cores via variáveis CSS) muda instantaneamente com a classe;
+  // só os gráficos precisam de atualização explícita das cores — in-place.
+  applyChartTheme();
 }
+
+// ── Menu do usuário (topbar): abre/fecha ao clicar no nome ─────────────────────
+function toggleUserMenu(ev) {
+  if (ev) ev.stopPropagation();
+  const wrap = document.getElementById('topbar-user-wrap');
+  if (!wrap) return;
+  const open = wrap.classList.toggle('open');
+  const btn = document.getElementById('topbar-user');
+  if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+// Fecha o menu ao clicar em qualquer outro lugar
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('topbar-user-wrap');
+  if (wrap && wrap.classList.contains('open') && !wrap.contains(e.target)) {
+    wrap.classList.remove('open');
+    const btn = document.getElementById('topbar-user');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+});
 
 // ── Filtros compartilhados (Unidade + Período) entre todas as páginas ──────────
 // O filtro opera SEMPRE por intervalo explícito de datas (gDtIni/gDtFim).
@@ -1374,6 +1467,7 @@ const FIN_SVG = {
   logout:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M10 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>',
   moon:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>',
   sun:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  chevronDown:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>',
   userOff:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.2"/><path d="M6 21a6 6 0 0 1 10.5-4M3 3l18 18"/></svg>',
 };
 function finKpiCard(label, val, count, clr, svg, max) {
@@ -1500,6 +1594,7 @@ async function applyFinFilters() {
       data: {
         labels: ['Recebido','A Receber','Venc. CR','Pago','A Pagar','Venc. CP'],
         datasets: [{ borderRadius: 8, borderSkipped: false,
+          _roles: ['green','amber','red','blue','amber','red'],
           data: [cr.recebido, cr.avencer, cr.vencido, cp.pago, cp.apagar, cp.vencido],
           backgroundColor: [ct.green,ct.amber,ct.red,ct.blue,ct.amber,ct.red],
         }]
@@ -1620,6 +1715,7 @@ async function applyFlxFilters() {
       data: {
         labels: ['Entradas','Saídas','Saldo'],
         datasets: [{ borderRadius: 8, borderSkipped: false,
+          _roles: ['green','red', saldo>=0 ? 'blue' : 'red'],
           data: [entradas, saidas, saldo],
           backgroundColor: [ct.green,ct.red, saldo>=0 ? ct.blue : ct.red],
         }]
@@ -1741,6 +1837,7 @@ async function applyFatFilters() {
       data: {
         labels: mesLabels.length ? mesLabels : ['Sem dados'],
         datasets: [{ borderRadius: 8, borderSkipped: false,
+          _roles: mesData.length ? mesData.map(v => v >= 0 ? 'green' : 'red') : ['blue'],
           data: mesData.length ? mesData : [0],
           backgroundColor: mesData.length ? mesData.map(v => v >= 0 ? ct.green : ct.red) : [ct.blue],
         }]
@@ -2642,8 +2739,15 @@ function applyRoleUI() {
   const isAdmin = currentUser && currentUser.role === 'admin';
   document.getElementById('sec-admin').style.display   = isAdmin ? '' : 'none';
   document.getElementById('nav-usuarios').style.display = isAdmin ? '' : 'none';
-  const ll = document.getElementById('logout-label');
-  if (ll && currentUser) ll.textContent = 'Sair · ' + currentUser.nome.split(' ')[0];
+  // Usuário logado na topbar (à direita do switch de tema)
+  if (currentUser) {
+    const av = document.getElementById('tu-avatar');
+    if (av) av.textContent = (currentUser.nome.trim()[0] || '?').toUpperCase();
+    const nm = document.getElementById('tu-name');
+    if (nm) nm.textContent = currentUser.nome;
+    const rl = document.getElementById('tu-role');
+    if (rl) rl.textContent = ROLE_LABEL[currentUser.role] || currentUser.role;
+  }
 }
 
 async function enterApp() {
