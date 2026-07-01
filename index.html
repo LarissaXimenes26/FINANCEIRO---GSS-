@@ -583,12 +583,11 @@ select.form-input{cursor:pointer;color-scheme:dark}
         <button class="pill active" id="fin-per-month" onclick="setFinPeriod('month')">Mês</button>
         <button class="pill" id="fin-per-quarter" onclick="setFinPeriod('quarter')">Trimestre</button>
         <button class="pill" id="fin-per-year"    onclick="setFinPeriod('year')">Ano</button>
-        <button class="pill" id="fin-per-custom"  onclick="setFinPeriod('custom')">Personalizado</button>
       </div>
-      <div class="date-inputs" id="fin-date-range">
-        <input type="date" id="fin-dt-ini" onchange="applyFinFilters()">
+      <div class="date-inputs show" id="fin-date-range">
+        <input type="date" id="fin-dt-ini" onchange="onDateEdit('fin-dt-ini','fin-dt-fim',applyFinFilters)">
         <span>até</span>
-        <input type="date" id="fin-dt-fim" onchange="applyFinFilters()">
+        <input type="date" id="fin-dt-fim" onchange="onDateEdit('fin-dt-ini','fin-dt-fim',applyFinFilters)">
       </div>
     </div>
   </div>
@@ -615,12 +614,11 @@ select.form-input{cursor:pointer;color-scheme:dark}
         <button class="pill active" id="flx-per-month" onclick="setFlxPeriod('month')">Mês</button>
         <button class="pill" id="flx-per-quarter" onclick="setFlxPeriod('quarter')">Trimestre</button>
         <button class="pill" id="flx-per-year"    onclick="setFlxPeriod('year')">Ano</button>
-        <button class="pill" id="flx-per-custom"  onclick="setFlxPeriod('custom')">Personalizado</button>
       </div>
-      <div class="date-inputs" id="flx-date-range">
-        <input type="date" id="flx-dt-ini" onchange="applyFlxFilters()">
+      <div class="date-inputs show" id="flx-date-range">
+        <input type="date" id="flx-dt-ini" onchange="onDateEdit('flx-dt-ini','flx-dt-fim',applyFlxFilters)">
         <span>até</span>
-        <input type="date" id="flx-dt-fim" onchange="applyFlxFilters()">
+        <input type="date" id="flx-dt-fim" onchange="onDateEdit('flx-dt-ini','flx-dt-fim',applyFlxFilters)">
       </div>
     </div>
   </div>
@@ -647,12 +645,11 @@ select.form-input{cursor:pointer;color-scheme:dark}
         <button class="pill active" id="fat-per-month" onclick="setFatPeriod('month')">Mês</button>
         <button class="pill" id="fat-per-quarter" onclick="setFatPeriod('quarter')">Trimestre</button>
         <button class="pill" id="fat-per-year"    onclick="setFatPeriod('year')">Ano</button>
-        <button class="pill" id="fat-per-custom"  onclick="setFatPeriod('custom')">Personalizado</button>
       </div>
-      <div class="date-inputs" id="fat-date-range">
-        <input type="date" id="fat-dt-ini" onchange="applyFatFilters()">
+      <div class="date-inputs show" id="fat-date-range">
+        <input type="date" id="fat-dt-ini" onchange="onDateEdit('fat-dt-ini','fat-dt-fim',applyFatFilters)">
         <span>até</span>
-        <input type="date" id="fat-dt-fim" onchange="applyFatFilters()">
+        <input type="date" id="fat-dt-fim" onchange="onDateEdit('fat-dt-ini','fat-dt-fim',applyFatFilters)">
       </div>
     </div>
   </div>
@@ -679,12 +676,11 @@ select.form-input{cursor:pointer;color-scheme:dark}
         <button class="pill active" id="per-month" onclick="setPeriod('month')">Mês</button>
         <button class="pill" id="per-quarter" onclick="setPeriod('quarter')">Trimestre</button>
         <button class="pill" id="per-year"    onclick="setPeriod('year')">Ano</button>
-        <button class="pill" id="per-custom"  onclick="setPeriod('custom')">Personalizado</button>
       </div>
-      <div class="date-inputs" id="date-range">
-        <input type="date" id="dt-ini" onchange="applyDashFilters()">
+      <div class="date-inputs show" id="date-range">
+        <input type="date" id="dt-ini" onchange="onDateEdit('dt-ini','dt-fim',applyDashFilters)">
         <span>até</span>
-        <input type="date" id="dt-fim" onchange="applyDashFilters()">
+        <input type="date" id="dt-fim" onchange="onDateEdit('dt-ini','dt-fim',applyDashFilters)">
       </div>
     </div>
   </div>
@@ -1114,21 +1110,29 @@ async function showPage(name) {
 }
 
 // ── Filtros compartilhados (Unidade + Período) entre todas as páginas ──────────
+// O filtro opera SEMPRE por intervalo explícito de datas (gDtIni/gDtFim).
+// Os botões Hoje/Semana/Mês/Trimestre/Ano são atalhos que apenas PREENCHEM
+// esse intervalo. gPeriod guarda qual atalho está selecionado (ou 'custom'
+// quando o usuário edita as datas manualmente) — só para destacar o pill.
 let gUnit = 'all', gPeriod = 'month', gDtIni = '', gDtFim = '';
+// Inicializa o intervalo com o mês corrente (atalho "Mês" ativo por padrão).
+(function initDefaultRange(){ const r = calcPeriodRange('month'); gDtIni = r.ini; gDtFim = r.fim; })();
 
 // Reflete o estado compartilhado nos pills/inputs de uma página (prefixo: uni, per, dt)
 function syncFilterUI(uniP, perP, dateRangeId, dtIniId, dtFimId) {
   document.querySelectorAll('[id^="' + uniP + '"]').forEach(b => b.classList.remove('active'));
   const ub = document.getElementById(uniP + gUnit); if (ub) ub.classList.add('active');
   document.querySelectorAll('[id^="' + perP + '"]').forEach(b => b.classList.remove('active'));
+  // Destaca o atalho selecionado (Hoje/Semana/... ); em edição manual nenhum fica ativo.
   const pb = document.getElementById(perP + gPeriod); if (pb) pb.classList.add('active');
-  const isCustom = gPeriod === 'custom';
-  const dr = document.getElementById(dateRangeId); if (dr) dr.classList.toggle('show', isCustom);
-  if (isCustom) {
-    const di = document.getElementById(dtIniId), df = document.getElementById(dtFimId);
-    if (di) di.value = gDtIni;
-    if (df) df.value = gDtFim;
-  }
+  // Os campos de data ficam SEMPRE visíveis; o intervalo é sempre refletido neles,
+  // exceto no campo que está em edição (com foco), para não resetar o segmento
+  // (ex.: o ano) de um <input type="date"> enquanto o usuário digita.
+  const dr = document.getElementById(dateRangeId); if (dr) dr.classList.add('show');
+  const di = document.getElementById(dtIniId), df = document.getElementById(dtFimId);
+  const ae = document.activeElement;
+  if (di && gDtIni && di !== ae) di.value = gDtIni;
+  if (df && gDtFim && df !== ae) df.value = gDtFim;
 }
 
 function calcPeriodRange(p, cIni = gDtIni, cFim = gDtFim) {
@@ -1168,13 +1172,23 @@ function setSharedUnit(u, uniPrefix, apply) {
   apply();
 }
 
+// Atalho de período: calcula o intervalo do preset (Hoje/Semana/Mês/Trimestre/Ano),
+// PREENCHE o filtro de datas com ele e aplica. O intervalo personalizado está
+// sempre visível, então tudo passa a operar por gDtIni/gDtFim.
 function setSharedPeriod(p, perPrefix, dateRangeId, apply) {
   gPeriod = p;
-  document.querySelectorAll('[id^="' + perPrefix + '"]').forEach(b => b.classList.remove('active'));
-  document.getElementById(perPrefix + p).classList.add('active');
-  const isCustom = p === 'custom';
-  document.getElementById(dateRangeId).classList.toggle('show', isCustom);
-  if (!isCustom) apply();
+  const { ini, fim } = calcPeriodRange(p);
+  gDtIni = ini; gDtFim = fim;
+  apply();
+}
+
+// Chamado quando o usuário edita manualmente um dos campos de data.
+// Lê os inputs, marca o período como 'custom' (nenhum preset destacado) e aplica.
+function onDateEdit(dtIniId, dtFimId, apply) {
+  gDtIni = document.getElementById(dtIniId).value;
+  gDtFim = document.getElementById(dtFimId).value;
+  gPeriod = 'custom';
+  apply();
 }
 
 function setFinUnit(u)   { setSharedUnit(u, 'fin-uni-', applyFinFilters); }
@@ -1207,7 +1221,8 @@ async function fetchScoped(table, unit, period, dtIni, dtFim, dateCol = 'data_ve
 }
 
 async function fetchFinTable(table, dateCol = 'data_vencimento', fields = 'situacao,valor,aba') {
-  return fetchScoped(table, gUnit, gPeriod, gDtIni, gDtFim, dateCol, fields);
+  // Sempre pelo intervalo explícito (gDtIni/gDtFim), independente do preset ativo.
+  return fetchScoped(table, gUnit, 'custom', gDtIni, gDtFim, dateCol, fields);
 }
 
 // SVG icons (inline, iguais ao modelo — independem da webfont)
@@ -1249,11 +1264,7 @@ function finKpiCard(label, val, count, clr, svg, max) {
 
 async function applyFinFilters() {
   syncFilterUI('fin-uni-', 'fin-per-', 'fin-date-range', 'fin-dt-ini', 'fin-dt-fim');
-  if (gPeriod === 'custom') {
-    gDtIni = document.getElementById('fin-dt-ini').value;
-    gDtFim = document.getElementById('fin-dt-fim').value;
-    if (!gDtIni || !gDtFim) return;
-  }
+  if (!gDtIni || !gDtFim) return;        // intervalo incompleto → aguarda as duas datas
   const el = document.getElementById('fin-content');
   el.innerHTML = '<div class="loading"><i class="ti ti-loader"></i> Carregando...</div>';
 
@@ -1389,20 +1400,16 @@ function setFlxPeriod(p) { setSharedPeriod(p, 'flx-per-', 'flx-date-range', appl
 
 async function applyFlxFilters() {
   syncFilterUI('flx-uni-', 'flx-per-', 'flx-date-range', 'flx-dt-ini', 'flx-dt-fim');
-  if (gPeriod === 'custom') {
-    gDtIni = document.getElementById('flx-dt-ini').value;
-    gDtFim = document.getElementById('flx-dt-fim').value;
-    if (!gDtIni || !gDtFim) return;
-  }
+  if (!gDtIni || !gDtFim) return;        // intervalo incompleto → aguarda as duas datas
   const el = document.getElementById('flx-content');
   el.innerHTML = '<div class="loading"><i class="ti ti-loader"></i> Carregando...</div>';
 
   // Mesma lógica do Dashboard: Entradas vêm do "Recebido" de Contas a Receber;
   // Saídas e contas correntes vêm do Fluxo de Caixa.
   const [recRows, flxRows] = await Promise.all([
-    fetchScoped('gss_contas_receber', gUnit, gPeriod, gDtIni, gDtFim,
+    fetchScoped('gss_contas_receber', gUnit, 'custom', gDtIni, gDtFim,
       'data_vencimento', 'situacao,valor,aba'),
-    fetchScoped('gss_fluxo_caixa', gUnit, gPeriod, gDtIni, gDtFim,
+    fetchScoped('gss_fluxo_caixa', gUnit, 'custom', gDtIni, gDtFim,
       'data', 'tipo,conta_corrente,valor,aba'),
   ]);
 
@@ -1513,15 +1520,11 @@ function setFatPeriod(p) { setSharedPeriod(p, 'fat-per-', 'fat-date-range', appl
 
 async function applyFatFilters() {
   syncFilterUI('fat-uni-', 'fat-per-', 'fat-date-range', 'fat-dt-ini', 'fat-dt-fim');
-  if (gPeriod === 'custom') {
-    gDtIni = document.getElementById('fat-dt-ini').value;
-    gDtFim = document.getElementById('fat-dt-fim').value;
-    if (!gDtIni || !gDtFim) return;
-  }
+  if (!gDtIni || !gDtFim) return;        // intervalo incompleto → aguarda as duas datas
   const el = document.getElementById('fat-content');
   el.innerHTML = '<div class="loading"><i class="ti ti-loader"></i> Carregando...</div>';
 
-  const rows = await fetchScoped('gss_faturamento', gUnit, gPeriod, gDtIni, gDtFim,
+  const rows = await fetchScoped('gss_faturamento', gUnit, 'custom', gDtIni, gDtFim,
     'faturado_em', 'situacao,cliente,valor,faturado_em,aba');
 
   let bruto = 0, devolucao = 0, liquido = 0, brutoC = 0, devC = 0, liqC = 0;
@@ -1632,7 +1635,8 @@ function setUnit(u)   { setSharedUnit(u, 'uni-', applyDashFilters); }
 function setPeriod(p) { setSharedPeriod(p, 'per-', 'date-range', applyDashFilters); }
 
 async function fetchDashTable(table, dateCol = 'data_vencimento', fields = 'situacao,valor,aba') {
-  const { ini, fim } = calcPeriodRange(gPeriod);
+  // Sempre pelo intervalo explícito (gDtIni/gDtFim), independente do preset ativo.
+  const { ini, fim } = calcPeriodRange('custom', gDtIni, gDtFim);
   let all = [], from = 0;
   while (true) {
     let q = sb.from(table).select(fields);
@@ -1651,11 +1655,7 @@ async function fetchDashTable(table, dateCol = 'data_vencimento', fields = 'situ
 
 async function applyDashFilters() {
   syncFilterUI('uni-', 'per-', 'date-range', 'dt-ini', 'dt-fim');
-  if (gPeriod === 'custom') {
-    gDtIni = document.getElementById('dt-ini').value;
-    gDtFim = document.getElementById('dt-fim').value;
-    if (!gDtIni || !gDtFim) return;
-  }
+  if (!gDtIni || !gDtFim) return;        // intervalo incompleto → aguarda as duas datas
   const el = document.getElementById('dash-content');
   el.innerHTML = '<div class="loading"><i class="ti ti-loader"></i> Carregando...</div>';
 
