@@ -580,9 +580,9 @@ select.form-input{cursor:pointer;color-scheme:dark}
       <div class="pill-group">
         <button class="pill" id="fin-per-today"   onclick="setFinPeriod('today')">Hoje</button>
         <button class="pill" id="fin-per-week"    onclick="setFinPeriod('week')">Semana</button>
-        <button class="pill active" id="fin-per-month" onclick="setFinPeriod('month')">Mês</button>
+        <button class="pill" id="fin-per-month" onclick="setFinPeriod('month')">Mês</button>
         <button class="pill" id="fin-per-quarter" onclick="setFinPeriod('quarter')">Trimestre</button>
-        <button class="pill" id="fin-per-year"    onclick="setFinPeriod('year')">Ano</button>
+        <button class="pill active" id="fin-per-year"    onclick="setFinPeriod('year')">Ano</button>
       </div>
       <div class="date-inputs show" id="fin-date-range">
         <input type="date" id="fin-dt-ini" onchange="onDateEdit('fin-dt-ini','fin-dt-fim',applyFinFilters)">
@@ -611,9 +611,9 @@ select.form-input{cursor:pointer;color-scheme:dark}
       <div class="pill-group">
         <button class="pill" id="flx-per-today"   onclick="setFlxPeriod('today')">Hoje</button>
         <button class="pill" id="flx-per-week"    onclick="setFlxPeriod('week')">Semana</button>
-        <button class="pill active" id="flx-per-month" onclick="setFlxPeriod('month')">Mês</button>
+        <button class="pill" id="flx-per-month" onclick="setFlxPeriod('month')">Mês</button>
         <button class="pill" id="flx-per-quarter" onclick="setFlxPeriod('quarter')">Trimestre</button>
-        <button class="pill" id="flx-per-year"    onclick="setFlxPeriod('year')">Ano</button>
+        <button class="pill active" id="flx-per-year"    onclick="setFlxPeriod('year')">Ano</button>
       </div>
       <div class="date-inputs show" id="flx-date-range">
         <input type="date" id="flx-dt-ini" onchange="onDateEdit('flx-dt-ini','flx-dt-fim',applyFlxFilters)">
@@ -642,9 +642,9 @@ select.form-input{cursor:pointer;color-scheme:dark}
       <div class="pill-group">
         <button class="pill" id="fat-per-today"   onclick="setFatPeriod('today')">Hoje</button>
         <button class="pill" id="fat-per-week"    onclick="setFatPeriod('week')">Semana</button>
-        <button class="pill active" id="fat-per-month" onclick="setFatPeriod('month')">Mês</button>
+        <button class="pill" id="fat-per-month" onclick="setFatPeriod('month')">Mês</button>
         <button class="pill" id="fat-per-quarter" onclick="setFatPeriod('quarter')">Trimestre</button>
-        <button class="pill" id="fat-per-year"    onclick="setFatPeriod('year')">Ano</button>
+        <button class="pill active" id="fat-per-year"    onclick="setFatPeriod('year')">Ano</button>
       </div>
       <div class="date-inputs show" id="fat-date-range">
         <input type="date" id="fat-dt-ini" onchange="onDateEdit('fat-dt-ini','fat-dt-fim',applyFatFilters)">
@@ -673,9 +673,9 @@ select.form-input{cursor:pointer;color-scheme:dark}
       <div class="pill-group">
         <button class="pill" id="per-today"   onclick="setPeriod('today')">Hoje</button>
         <button class="pill" id="per-week"    onclick="setPeriod('week')">Semana</button>
-        <button class="pill active" id="per-month" onclick="setPeriod('month')">Mês</button>
+        <button class="pill" id="per-month" onclick="setPeriod('month')">Mês</button>
         <button class="pill" id="per-quarter" onclick="setPeriod('quarter')">Trimestre</button>
-        <button class="pill" id="per-year"    onclick="setPeriod('year')">Ano</button>
+        <button class="pill active" id="per-year"    onclick="setPeriod('year')">Ano</button>
       </div>
       <div class="date-inputs show" id="date-range">
         <input type="date" id="dt-ini" onchange="onDateEdit('dt-ini','dt-fim',applyDashFilters)">
@@ -834,7 +834,7 @@ select.form-input{cursor:pointer;color-scheme:dark}
 // ── Versão do app ─────────────────────────────────────────────────────────────
 // Fonte única da versão. Ao publicar uma nova versão: atualize aqui (SemVer),
 // comite e crie a tag git correspondente (ex.: git tag -a v1.1.0).
-const APP_VERSION = 'v1.0.1';
+const APP_VERSION = 'v1.0.2';
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 const SB_URL = 'https://mbtwhghgqifjkgskrzlr.supabase.co';
@@ -1119,9 +1119,9 @@ async function showPage(name) {
 // Os botões Hoje/Semana/Mês/Trimestre/Ano são atalhos que apenas PREENCHEM
 // esse intervalo. gPeriod guarda qual atalho está selecionado (ou 'custom'
 // quando o usuário edita as datas manualmente) — só para destacar o pill.
-let gUnit = 'all', gPeriod = 'month', gDtIni = '', gDtFim = '';
-// Inicializa o intervalo com o mês corrente (atalho "Mês" ativo por padrão).
-(function initDefaultRange(){ const r = calcPeriodRange('month'); gDtIni = r.ini; gDtFim = r.fim; })();
+let gUnit = 'all', gPeriod = 'year', gDtIni = '', gDtFim = '';
+// Inicializa o intervalo com o ano corrente (atalho "Ano" ativo por padrão).
+(function initDefaultRange(){ const r = calcPeriodRange('year'); gDtIni = r.ini; gDtFim = r.fim; })();
 
 // Reflete o estado compartilhado nos pills/inputs de uma página (prefixo: uni, per, dt)
 function syncFilterUI(uniP, perP, dateRangeId, dtIniId, dtFimId) {
