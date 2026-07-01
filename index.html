@@ -654,8 +654,8 @@ select.form-input{cursor:pointer;color-scheme:var(--date-scheme)}
       <i class="ti ti-users"></i>Usuários
     </button>
   </div>
-  <div class="sidebar-footer" style="flex-direction:column;align-items:stretch;gap:10px">
-    <span id="app-version" style="font-size:11px;color:var(--muted2);letter-spacing:.3px"></span>
+  <div class="sidebar-footer" style="flex-direction:column;align-items:center;gap:10px">
+    <span id="app-version" style="font-size:11px;color:var(--muted2);letter-spacing:.3px;text-align:center"></span>
   </div>
 </aside>
 
@@ -979,7 +979,7 @@ select.form-input{cursor:pointer;color-scheme:var(--date-scheme)}
 // ── Versão do app ─────────────────────────────────────────────────────────────
 // Fonte única da versão. Ao publicar uma nova versão: atualize aqui (SemVer),
 // comite e crie a tag git correspondente (ex.: git tag -a v1.1.0).
-const APP_VERSION = 'v1.2.0';
+const APP_VERSION = 'v1.2.1';
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 const SB_URL = 'https://mbtwhghgqifjkgskrzlr.supabase.co';
@@ -1478,7 +1478,6 @@ function finKpiCard(label, val, count, clr, svg, max) {
     <div class="fin-value num">${fmtBRL(val)}</div>
     <div class="fin-bar"><div class="fin-bar-fill clr-${clr}" style="width:${pct}%"></div></div>
     <div class="fin-meta">
-      <span class="fin-count"><b>${count}</b> lançamentos</span>
       <span class="num">${fmtShort(val)}</span>
     </div>
   </div>`;
@@ -1516,7 +1515,7 @@ async function applyFinFilters() {
 
   const maxCR = Math.max(cr.recebido, cr.avencer, cr.vencido)||1;
   const maxCP = Math.max(cp.pago, cp.apagar, cp.vencido)||1;
-  const expenses = Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const expenses = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
   const maxExp = expenses[0]?.[1]||1;
   const totalExp = Object.values(catMap).reduce((s,v)=>s+v,0)||1;
 
@@ -1547,17 +1546,17 @@ async function applyFinFilters() {
       <div class="summary-cell">
         <div class="lbl"><span class="dot" style="background:var(--red)"></span> Total vencido</div>
         <div class="val num neg">${fmtBRL(totalVenc)}</div>
-        <div class="meta">${vencCount} lançamentos · exige atenção</div>
+        <div class="meta">Exige atenção</div>
       </div>
     </div>
 
-    <div class="fin-section">Contas a Receber<span class="sum num">${totCRcount} lançamentos · ${fmtShort(totCR)}</span></div>
+    <div class="fin-section">Contas a Receber<span class="sum num">${fmtShort(totCR)}</span></div>
     <div class="fin-kpi-grid">
       ${finKpiCard('Recebido',  cr.recebido, crC.recebido, 'green', 'up',    maxCR)}
       ${finKpiCard('A Receber', cr.avencer,  crC.avencer,  'amber', 'clock', maxCR)}
       ${finKpiCard('Vencido',   cr.vencido,  crC.vencido,  'red',   'alert', maxCR)}
     </div>
-    <div class="fin-section">Contas a Pagar<span class="sum num">${totCPcount} lançamentos · ${fmtShort(totCP)}</span></div>
+    <div class="fin-section">Contas a Pagar<span class="sum num">${fmtShort(totCP)}</span></div>
     <div class="fin-kpi-grid">
       ${finKpiCard('Pago',    cp.pago,    cpC.pago,    'blue',  'check', maxCP)}
       ${finKpiCard('A Pagar', cp.apagar,  cpC.apagar,  'amber', 'clock', maxCP)}
@@ -1569,10 +1568,11 @@ async function applyFinFilters() {
         <div class="fin-card-sub">Comparativo de recebimentos e pagamentos</div>
         <div style="position:relative;height:260px;margin-top:14px"><canvas id="fin-chart"></canvas></div>
       </div>
-      <div class="fin-card" style="overflow-y:auto;max-height:360px;
-        scrollbar-width:thin;scrollbar-color:var(--scroll) transparent">
-        <div class="fin-card-title">Top despesas</div>
-        <div class="fin-card-sub">por categoria</div>
+      <div class="fin-card" style="display:flex;flex-direction:column;max-height:360px">
+        <div class="fin-card-title">Despesas</div>
+        <div class="fin-card-sub">todas as categorias</div>
+        <div style="overflow-y:auto;margin-top:4px;min-height:0;flex:1;
+          scrollbar-width:thin;scrollbar-color:var(--scroll) transparent">
         ${expenses.map(([cat,val],i) => `
           <div class="fin-exp-row${i===0?' lead':''}">
             <span class="fin-exp-rank">${i+1}</span>
@@ -1583,6 +1583,7 @@ async function applyFinFilters() {
               <span class="fin-exp-pct num">${(val/totalExp*100).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}%</span>
             </div>
           </div>`).join('')}
+        </div>
       </div>
     </div>`;
 
@@ -1665,12 +1666,12 @@ async function applyFlxFilters() {
       <div class="summary-cell">
         <div class="lbl"><span class="dot" style="background:var(--green)"></span> Entradas</div>
         <div class="val num pos">${fmtBRL(entradas)}</div>
-        <div class="meta">${entC} lançamentos · recebimentos</div>
+        <div class="meta">Recebimentos</div>
       </div>
       <div class="summary-cell">
         <div class="lbl"><span class="dot" style="background:var(--red)"></span> Saídas</div>
         <div class="val num neg">${fmtBRL(saidas)}</div>
-        <div class="meta">${saiC} lançamentos · pagamentos</div>
+        <div class="meta">Pagamentos</div>
       </div>
       <div class="summary-cell">
         <div class="lbl"><span class="dot" style="background:var(--blue)"></span> Saldo do período</div>
@@ -1679,7 +1680,7 @@ async function applyFlxFilters() {
       </div>
     </div>
 
-    <div class="fin-section">Movimentação<span class="sum num">${entC + saiC} lançamentos</span></div>
+    <div class="fin-section">Movimentação</div>
     <div class="fin-kpi-grid">
       ${finKpiCard('Entradas', entradas, entC, 'green', 'inflow',  maxKpi)}
       ${finKpiCard('Saídas',   saidas,   saiC, 'red',   'outflow', maxKpi)}
@@ -1786,7 +1787,7 @@ async function applyFatFilters() {
       <div class="summary-cell">
         <div class="lbl"><span class="dot" style="background:var(--blue)"></span> Faturamento líquido</div>
         <div class="val num ${liquido>=0?'pos':'neg'}">${sign(liquido)}</div>
-        <div class="meta">${liqC} lançamentos · bruto − devoluções</div>
+        <div class="meta">Bruto − devoluções</div>
       </div>
       <div class="summary-cell">
         <div class="lbl"><span class="dot" style="background:var(--green)"></span> Faturamento bruto</div>
@@ -1800,7 +1801,7 @@ async function applyFatFilters() {
       </div>
     </div>
 
-    <div class="fin-section">Faturamento<span class="sum num">${liqC} lançamentos · ${fmtShort(bruto)}</span></div>
+    <div class="fin-section">Faturamento<span class="sum num">${fmtShort(bruto)}</span></div>
     <div class="fin-kpi-grid">
       ${finKpiCard('Bruto',     bruto,     brutoC, 'green', 'trendUp',   maxKpi)}
       ${finKpiCard('Líquido',   liquido,   liqC,   liquido>=0?'blue':'red', 'calc', maxKpi)}
@@ -2014,7 +2015,6 @@ function kpiCard(title, valor, count, color, icon) {
     <div class="kpi-body">
       <div class="kpi-title">${title}</div>
       <div class="kpi-value num" style="color:${color}">${fmtBRL(valor)}</div>
-      ${count > 0 ? `<div class="kpi-count">${count} lançamento${count !== 1 ? 's' : ''}</div>` : ''}
     </div>
   </div>`;
 }
