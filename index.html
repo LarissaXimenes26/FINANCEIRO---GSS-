@@ -537,6 +537,7 @@ select.form-input{cursor:pointer;color-scheme:dark}
       <span class="btn-ico" data-ico="logout"></span><span id="logout-label">Sair</span>
     </button>
     <span><span class="pulse"></span> Dados sincronizados · Omie ERP</span>
+    <span id="app-version" style="font-size:11px;color:var(--muted2);letter-spacing:.3px"></span>
   </div>
 </aside>
 
@@ -831,6 +832,11 @@ select.form-input{cursor:pointer;color-scheme:dark}
 </div>
 
 <script>
+// ── Versão do app ─────────────────────────────────────────────────────────────
+// Fonte única da versão. Ao publicar uma nova versão: atualize aqui (SemVer),
+// comite e crie a tag git correspondente (ex.: git tag -a v1.1.0).
+const APP_VERSION = 'v1.0.0';
+
 // ── Supabase ──────────────────────────────────────────────────────────────────
 const SB_URL = 'https://mbtwhghgqifjkgskrzlr.supabase.co';
 const SB_KEY = 'sb_publishable_D-C-FFYIEvvi_dWvQITWRg__Z2wA0Us';
@@ -2541,6 +2547,8 @@ document.addEventListener('keydown', e => {
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async () => {
   paintIcons();   // preenche os ícones SVG dos botões estáticos
+  const verEl = document.getElementById('app-version');
+  if (verEl) verEl.textContent = 'Versão ' + APP_VERSION;
   const saved = sessionStorage.getItem('gss_user');
   if (saved) {
     try { currentUser = JSON.parse(saved); } catch (_) { currentUser = null; }
