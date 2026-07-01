@@ -834,7 +834,7 @@ select.form-input{cursor:pointer;color-scheme:dark}
 // ── Versão do app ─────────────────────────────────────────────────────────────
 // Fonte única da versão. Ao publicar uma nova versão: atualize aqui (SemVer),
 // comite e crie a tag git correspondente (ex.: git tag -a v1.1.0).
-const APP_VERSION = 'v1.0.2';
+const APP_VERSION = 'v1.0.3';
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 const SB_URL = 'https://mbtwhghgqifjkgskrzlr.supabase.co';
@@ -1480,7 +1480,7 @@ async function applyFlxFilters() {
           <div class="fin-exp-row">
             <span class="fin-exp-rank">${i+1}</span>
             <div style="min-width:0"><div class="fin-exp-name" title="${esc(cc)}">${esc(cc)}</div>
-              <div class="fin-exp-bar-wrap"><div class="fin-exp-bar-fill" style="width:${Math.round(Math.abs(val)/maxCC*100)}%"></div></div></div>
+              <div class="fin-exp-bar-wrap"><div class="fin-exp-bar-fill" style="width:${Math.round(Math.abs(val)/maxCC*100)}%;background:var(--red)"></div></div></div>
             <div class="fin-exp-amt">
               <span class="fin-exp-val num" style="color:${val<0?'var(--red)':'var(--text)'}">${sign(val)}</span>
             </div>
